@@ -49,6 +49,20 @@ export default function OffcanvasSidebar({ isOpen, onClose }: OffcanvasSidebarPr
           <Link href="/about" onClick={onClose} style={{ padding: '10px 14px', borderRadius: '8px', fontWeight: 600, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-users" style={{ color: 'var(--emerald-600)', width: '20px' }}></i> About Us
           </Link>
+          <div style={{ paddingLeft: '28px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <Link href="/mission" onClick={onClose} style={{ padding: '6px 10px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500, color: 'var(--slate-600)' }}>
+              &bull; Our Mission
+            </Link>
+            <Link href="/vision" onClick={onClose} style={{ padding: '6px 10px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500, color: 'var(--slate-600)' }}>
+              &bull; Our Vision
+            </Link>
+            <Link href="/objectives" onClick={onClose} style={{ padding: '6px 10px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500, color: 'var(--slate-600)' }}>
+              &bull; Objectives
+            </Link>
+            <Link href="/how-we-work" onClick={onClose} style={{ padding: '6px 10px', borderRadius: '6px', fontSize: '0.85rem', fontWeight: 500, color: 'var(--slate-600)' }}>
+              &bull; How We Work
+            </Link>
+          </div>
           <Link href="/projects" onClick={onClose} style={{ padding: '10px 14px', borderRadius: '8px', fontWeight: 600, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-seedling" style={{ color: 'var(--emerald-600)', width: '20px' }}></i> Projects
           </Link>
@@ -57,6 +71,15 @@ export default function OffcanvasSidebar({ isOpen, onClose }: OffcanvasSidebarPr
           </Link>
           <Link href="/resources" onClick={onClose} style={{ padding: '10px 14px', borderRadius: '8px', fontWeight: 600, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-solid fa-book-open" style={{ color: 'var(--emerald-600)', width: '20px' }}></i> Publications
+          </Link>
+          <Link href="/donate" onClick={onClose} style={{ padding: '10px 14px', borderRadius: '8px', fontWeight: 700, color: '#059669', background: '#ecfdf5', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <i className="fa-solid fa-heart" style={{ color: '#f43f5e', width: '20px' }}></i> Donate &amp; Support
+          </Link>
+          <Link href="/team" onClick={onClose} style={{ padding: '10px 14px', borderRadius: '8px', fontWeight: 600, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <i className="fa-solid fa-user-group" style={{ color: 'var(--emerald-600)', width: '20px' }}></i> Our Team
+          </Link>
+          <Link href="/faq" onClick={onClose} style={{ padding: '10px 14px', borderRadius: '8px', fontWeight: 600, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <i className="fa-regular fa-circle-question" style={{ color: 'var(--emerald-600)', width: '20px' }}></i> FAQ
           </Link>
           <Link href="/events" onClick={onClose} style={{ padding: '10px 14px', borderRadius: '8px', fontWeight: 600, color: 'var(--slate-800)', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <i className="fa-regular fa-calendar-check" style={{ color: 'var(--emerald-600)', width: '20px' }}></i> Events &amp; Convenings

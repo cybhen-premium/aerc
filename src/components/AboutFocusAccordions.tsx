@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 
+import Link from 'next/link';
+
 export interface AccordionPillar {
   id: string;
   title: string;
   summary: string;
+  slug?: string;
 }
 
 export function GreenFocusAccordion({
@@ -44,6 +47,17 @@ export function GreenFocusAccordion({
             <div className={`green-accordion-drawer ${isOpen ? 'open' : ''}`}>
               <div className="green-accordion-body">
                 <p>{pillar.summary}</p>
+                {pillar.slug && (
+                  <div className="mt-2.5">
+                    <Link
+                      href={`/focus/${pillar.slug}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition"
+                    >
+                      <span>Explore this Focus Area</span>
+                      <span>&rarr;</span>
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>

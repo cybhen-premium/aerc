@@ -13,8 +13,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const blog = await getBlogPostBySlug(slug);
   if (!blog) return { title: 'Post Not Found – AERCGH' };
   return {
-    title: `${blog.title} – AERCGH Field Journal`,
-    description: blog.excerpt || blog.title,
+    title: blog.seoTitle ? `${blog.seoTitle} | AERC Ghana` : `${blog.title} – AERCGH Field Journal`,
+    description: blog.seoDescription || blog.excerpt || blog.title,
   };
 }
 
@@ -246,7 +246,12 @@ export default async function BlogDetailPage({ params }: Props) {
 
           {/* Featured Cover Image */}
           <div className="article-cover-wrap">
-            <img src={blog.coverImage || '/images/hero-bg.jpg'} alt={blog.title} />
+            <img src={blog.coverImage || '/images/hero-bg.jpg'} alt={blog.imageAlt || blog.title} />
+            {blog.imageCaption && (
+              <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic', marginTop: '8px', textAlign: 'center' }}>
+                {blog.imageCaption}
+              </p>
+            )}
           </div>
 
           {/* Lead Excerpt Callout */}
@@ -260,6 +265,31 @@ export default async function BlogDetailPage({ params }: Props) {
           <div className="article-prose">
             {renderArticleContent(blog.content)}
           </div>
+
+          {/* Article Tags */}
+          {blog.tags && (
+            <div style={{ margin: '24px 0', display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase' }}>
+                <i className="fa-solid fa-tags"></i> Tags:
+              </span>
+              {blog.tags.split(',').map((t, i) => (
+                <span
+                  key={i}
+                  style={{
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    padding: '4px 10px',
+                    background: '#ecfdf5',
+                    color: '#059669',
+                    borderRadius: '6px',
+                    border: '1px solid #a7f3d0',
+                  }}
+                >
+                  {t.trim()}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Author Bio Box */}
           <div className="article-author-box">

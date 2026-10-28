@@ -72,6 +72,10 @@ export default function ClientLayoutWrapper({ children }: { children: React.Reac
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  if (pathname?.startsWith('/admin')) {
+    return <>{children}</>;
+  }
+
   return (
     <>
       <OffcanvasSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />

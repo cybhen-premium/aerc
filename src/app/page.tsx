@@ -2,7 +2,7 @@ import Link from 'next/link';
 import HeroSlider from '@/components/HeroSlider';
 import FocusAccordion from '@/components/FocusAccordion';
 import LatestPublicationsSlider from '@/components/LatestPublicationsSlider';
-import { getProjects, getBlogPosts } from '@/db';
+import { getProjects, getBlogPosts, getFocusAreas } from '@/db';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,12 +58,15 @@ const teamMembers = [
 ];
 
 export default async function HomePage() {
-  const [allProjects, allBlogs] = await Promise.all([
+  const [allProjects, allBlogs, allFocusAreas] = await Promise.all([
     getProjects(),
     getBlogPosts(),
+    getFocusAreas(),
   ]);
 
-  const featuredProjects = allProjects.slice(0, 6);
+  const publicProjects = allProjects.filter((p) => p.isPublic !== 'no' && p.status !== 'Archived');
+  const explicitlyFeatured = publicProjects.filter((p) => p.isFeatured === 'yes');
+  const featuredProjects = explicitlyFeatured.length > 0 ? explicitlyFeatured.slice(0, 6) : publicProjects.slice(0, 6);
   const recentArticles = allBlogs.slice(0, 3);
 
   return (
@@ -118,7 +121,7 @@ export default async function HomePage() {
                 </p>
               </div>
 
-              <FocusAccordion />
+              <FocusAccordion focusAreas={allFocusAreas} />
             </div>
           </div>
         </div>

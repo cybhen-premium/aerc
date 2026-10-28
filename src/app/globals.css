@@ -5,8 +5,34 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* --- CSS Variables & Design Tokens --- */
 :root {
+  /* Shadcn / UI tokens */
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --primary: 160 84% 39%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222 47% 11%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  --accent: 38 92% 50%;
+  --accent-foreground: 222 47% 11%;
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 160 84% 39%;
+  --radius: 0.5rem;
+
   /* Brand Emerald & Greens */
   --emerald-950: #022c22;
   --emerald-900: #064e3b;
@@ -16,46 +42,46 @@
   --emerald-500: #10b981;
   --emerald-400: #34d399;
   --emerald-100: #d1fae5;
-  --emerald-50:  #ecfdf5;
+  --emerald-50: #ecfdf5;
 
   /* Accent Gold / Earth */
-  --amber-500:   #f59e0b;
-  --amber-400:   #fbbf24;
-  --amber-100:   #fef3c7;
+  --amber-500: #f59e0b;
+  --amber-400: #fbbf24;
+  --amber-100: #fef3c7;
 
   /* Neutrals & Dark Theme Elements */
-  --slate-950:   #090d16;
-  --slate-900:   #0f172a;
-  --slate-850:   #141e33;
-  --slate-800:   #1e293b;
-  --slate-700:   #334155;
-  --slate-600:   #475569;
-  --slate-500:   #64748b;
-  --slate-400:   #94a3b8;
-  --slate-200:   #e2e8f0;
-  --slate-100:   #f1f5f9;
-  --slate-50:    #f8fafc;
-  --white:       #ffffff;
+  --slate-950: #090d16;
+  --slate-900: #0f172a;
+  --slate-850: #141e33;
+  --slate-800: #1e293b;
+  --slate-700: #334155;
+  --slate-600: #475569;
+  --slate-500: #64748b;
+  --slate-400: #94a3b8;
+  --slate-200: #e2e8f0;
+  --slate-100: #f1f5f9;
+  --slate-50: #f8fafc;
+  --white: #ffffff;
 
   /* Functional mappings */
-  --primary:         var(--emerald-600);
-  --primary-hover:   var(--emerald-700);
-  --primary-light:   var(--emerald-50);
-  --primary-glow:    rgba(16, 185, 129, 0.28);
-  --primary-green:   #16a34a;
-  --primary-dark:    #0f172a;
-  --accent:          var(--amber-500);
-  --bg-page:         #ffffff;
-  --bg-surface:      var(--slate-50);
-  --text-heading:    var(--slate-900);
-  --text-body:       var(--slate-600);
-  --text-muted:      var(--slate-500);
-  --border-subtle:   rgba(226, 232, 240, 0.8);
-  --border-focus:    var(--emerald-500);
+  --primary: var(--emerald-600);
+  --primary-hover: var(--emerald-700);
+  --primary-light: var(--emerald-50);
+  --primary-glow: rgba(16, 185, 129, 0.28);
+  --primary-green: #16a34a;
+  --primary-dark: #0f172a;
+  --accent: var(--amber-500);
+  --bg-page: #ffffff;
+  --bg-surface: var(--slate-50);
+  --text-heading: var(--slate-900);
+  --text-body: var(--slate-600);
+  --text-muted: var(--slate-500);
+  --border-subtle: rgba(226, 232, 240, 0.8);
+  --border-focus: var(--emerald-500);
 
   /* Typography */
   --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body:    'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
@@ -75,7 +101,9 @@
 }
 
 /* --- Global Reset --- */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -96,7 +124,12 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   color: var(--text-heading);
   font-weight: 700;
@@ -676,7 +709,8 @@ ul {
   height: 100%;
   background-size: cover;
   background-position: center;
-  filter: brightness(0.56) contrast(1.05);
+  /* 100% natural photo brightness matching aercghana.org */
+  filter: none;
   transform: scale(1.02);
   transition: opacity 1s ease-in-out;
 }
@@ -687,8 +721,8 @@ ul {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 20% 40%, rgba(6, 95, 70, 0.48) 0%, transparent 60%),
-              linear-gradient(180deg, rgba(9, 13, 22, 0.32) 0%, rgba(9, 13, 22, 0.76) 85%, var(--slate-950) 100%);
+  /* Gentle, subtle vignette so the image is fully visible like aercghana.org */
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.22) 0%, rgba(0, 0, 0, 0.12) 40%, rgba(0, 0, 0, 0.32) 100%);
   z-index: 1;
 }
 
@@ -700,25 +734,31 @@ ul {
 
 .hero-headline {
   font-size: clamp(2.4rem, 4.8vw, 4.2rem);
-  color: var(--white);
+  color: #ffffff;
   line-height: 1.15;
   margin-bottom: 24px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   font-weight: 800;
+  /* Crisp white text with shadow for high contrast over bright image */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75), 0 4px 24px rgba(0, 0, 0, 0.6);
 }
 
 .hero-headline span {
-  background: linear-gradient(120deg, #6ee7b7 0%, #34d399 50%, #fcd34d 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75), 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+  filter: none !important;
 }
 
 .hero-lead {
   font-size: clamp(1.05rem, 1.4vw, 1.25rem);
-  color: rgba(255, 255, 255, 0.85);
+  color: #ffffff;
   line-height: 1.7;
   margin-bottom: 36px;
   max-width: 760px;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
 }
 
 .hero-actions {
@@ -734,11 +774,12 @@ ul {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-lg);
   padding: 24px 30px;
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .metric-stat-item {
@@ -773,8 +814,8 @@ ul {
 .focus-stage {
   padding: 110px 0;
   background: radial-gradient(circle at 12% 18%, rgba(22, 163, 74, 0.05) 0%, transparent 45%),
-              radial-gradient(circle at 88% 82%, rgba(15, 23, 42, 0.04) 0%, transparent 45%),
-              #fbfdfc;
+    radial-gradient(circle at 88% 82%, rgba(15, 23, 42, 0.04) 0%, transparent 45%),
+    #fbfdfc;
   position: relative;
   overflow: hidden;
 }
@@ -804,7 +845,7 @@ ul {
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 24px 50px -12px rgba(15, 23, 42, 0.15),
-              0 0 0 1px rgba(22, 163, 74, 0.1);
+    0 0 0 1px rgba(22, 163, 74, 0.1);
   background: #ffffff;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
 }
@@ -812,7 +853,7 @@ ul {
 .focus-image-frame:hover {
   transform: translateY(-4px);
   box-shadow: 0 30px 60px -15px rgba(15, 23, 42, 0.2),
-              0 0 0 1px rgba(22, 163, 74, 0.2);
+    0 0 0 1px rgba(22, 163, 74, 0.2);
 }
 
 .focus-glow-backdrop {
@@ -872,9 +913,11 @@ ul {
   0% {
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
   }
+
   70% {
     box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
   }
+
   100% {
     box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
   }
@@ -1015,7 +1058,7 @@ ul {
 .modern-pillar-card.active {
   border-color: #86efac;
   box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.12),
-              0 0 0 1px rgba(22, 163, 74, 0.15);
+    0 0 0 1px rgba(22, 163, 74, 0.15);
   border-left: 4px solid #16a34a;
 }
 
@@ -1646,6 +1689,7 @@ ul {
     grid-template-columns: 1fr;
     gap: 36px;
   }
+
   .objectives-grid {
     grid-template-columns: 1fr;
   }
@@ -2444,10 +2488,12 @@ ul {
   .article-pdf-frame-container {
     height: 520px;
   }
+
   .article-pdf-action-bar {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .article-pdf-buttons {
     width: 100%;
     justify-content: flex-start;
@@ -2670,6 +2716,7 @@ ul {
   .leave-comment-wrap {
     padding: 24px 18px;
   }
+
   .comment-form-grid {
     grid-template-columns: 1fr;
   }
@@ -2761,9 +2808,11 @@ ul {
   .journal-featured-grid {
     grid-template-columns: 1fr;
   }
+
   .journal-featured-thumb {
     height: 280px;
   }
+
   .journal-featured-content {
     padding: 32px 24px;
   }
@@ -2971,17 +3020,21 @@ ul {
   .header-nav {
     display: none;
   }
+
   .header-mobile-toggle {
     display: block;
   }
+
   .bento-card.col-8,
   .bento-card.col-4,
   .bento-card.col-6 {
     grid-column: span 12;
   }
+
   .festival-spotlight-box {
     grid-template-columns: 1fr;
   }
+
   .footer-cols-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -2991,18 +3044,23 @@ ul {
   .site-top-bar {
     display: none;
   }
+
   .footer-cols-grid {
     grid-template-columns: 1fr;
   }
+
   .hero-metrics-bar {
     grid-template-columns: 1fr 1fr;
   }
+
   .footer-newsletter-banner {
     padding: 28px 20px;
   }
+
   .footer-newsletter-form {
     flex-direction: column;
   }
+
   .footer-newsletter-input,
   .footer-newsletter-form button {
     width: 100%;
@@ -3045,7 +3103,7 @@ ul {
   width: 100%;
   height: 100%;
   background: linear-gradient(135deg, rgba(9, 13, 22, 0.76) 0%, rgba(6, 78, 59, 0.72) 100%),
-              radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.16) 0%, transparent 65%);
+    radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.16) 0%, transparent 65%);
   pointer-events: none;
   z-index: 1;
 }
@@ -3262,6 +3320,7 @@ ul {
     grid-template-columns: 1fr;
     gap: 36px;
   }
+
   .about-focus-row.reverse-mobile {
     display: flex;
     flex-direction: column-reverse;
@@ -3332,6 +3391,7 @@ ul {
     text-align: center;
     padding: 48px 28px;
   }
+
   .about-cta-actions {
     justify-content: center;
   }
@@ -3828,9 +3888,11 @@ ul {
   .partner-btn-full {
     display: none;
   }
+
   .partner-btn-short {
     display: inline;
   }
+
   .header-partner-btn {
     padding: 8px 14px;
     font-size: 0.82rem;
@@ -4031,6 +4093,7 @@ ul {
   .comment-form-grid {
     grid-template-columns: 1fr;
   }
+
   .leave-comment-wrap {
     padding: 24px 18px;
   }
@@ -4137,8 +4200,8 @@ ul {
 .pub-slider-section {
   padding: 105px 0;
   background: radial-gradient(circle at 85% 15%, rgba(22, 163, 74, 0.04) 0%, transparent 40%),
-              radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.03) 0%, transparent 40%),
-              #ffffff;
+    radial-gradient(circle at 10% 90%, rgba(15, 23, 42, 0.03) 0%, transparent 40%),
+    #ffffff;
   position: relative;
   overflow: hidden;
 }
@@ -4259,7 +4322,7 @@ ul {
   border-radius: 20px;
   padding: 44px 50px;
   box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.06),
-              0 0 0 1px rgba(22, 163, 74, 0.04);
+    0 0 0 1px rgba(22, 163, 74, 0.04);
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   align-items: center;
   min-height: 460px;
@@ -4267,7 +4330,7 @@ ul {
 
 .pub-featured-card:hover {
   box-shadow: 0 26px 55px -15px rgba(15, 23, 42, 0.1),
-              0 0 0 1px rgba(22, 163, 74, 0.12);
+    0 0 0 1px rgba(22, 163, 74, 0.12);
   border-color: #cbd5e1;
 }
 
@@ -4497,7 +4560,8 @@ ul {
   .event-card-item {
     grid-template-columns: 1fr !important;
   }
-  .event-card-item > div:first-child {
+
+  .event-card-item>div:first-child {
     min-height: 240px !important;
   }
 }
@@ -4520,9 +4584,9 @@ html {
   opacity: 0;
   will-change: opacity, transform;
   transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-              box-shadow 0.35s ease,
-              border-color 0.35s ease;
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.35s ease,
+    border-color 0.35s ease;
 }
 
 /* Slide Up (Cards & Items) */
@@ -4561,35 +4625,105 @@ html {
 }
 
 /* 3. Staggered Cascading Delays for Child Cards (Clearly Visible Cascade) */
-.projects-card-grid .project-modern-card:nth-child(1) { transition-delay: 0.05s; }
-.projects-card-grid .project-modern-card:nth-child(2) { transition-delay: 0.18s; }
-.projects-card-grid .project-modern-card:nth-child(3) { transition-delay: 0.32s; }
-.projects-card-grid .project-modern-card:nth-child(4) { transition-delay: 0.15s; }
-.projects-card-grid .project-modern-card:nth-child(5) { transition-delay: 0.28s; }
-.projects-card-grid .project-modern-card:nth-child(6) { transition-delay: 0.42s; }
+.projects-card-grid .project-modern-card:nth-child(1) {
+  transition-delay: 0.05s;
+}
 
-.team-grid .team-card:nth-child(1) { transition-delay: 0.05s; }
-.team-grid .team-card:nth-child(2) { transition-delay: 0.16s; }
-.team-grid .team-card:nth-child(3) { transition-delay: 0.28s; }
-.team-grid .team-card:nth-child(4) { transition-delay: 0.40s; }
-.team-grid .team-card:nth-child(5) { transition-delay: 0.52s; }
-.team-grid .team-card:nth-child(6) { transition-delay: 0.64s; }
+.projects-card-grid .project-modern-card:nth-child(2) {
+  transition-delay: 0.18s;
+}
 
-.modern-pillar-list .modern-pillar-card:nth-child(1) { transition-delay: 0.05s; }
-.modern-pillar-list .modern-pillar-card:nth-child(2) { transition-delay: 0.14s; }
-.modern-pillar-list .modern-pillar-card:nth-child(3) { transition-delay: 0.24s; }
-.modern-pillar-list .modern-pillar-card:nth-child(4) { transition-delay: 0.34s; }
-.modern-pillar-list .modern-pillar-card:nth-child(5) { transition-delay: 0.44s; }
+.projects-card-grid .project-modern-card:nth-child(3) {
+  transition-delay: 0.32s;
+}
 
-.objectives-grid .objective-item:nth-child(1) { transition-delay: 0.06s; }
-.objectives-grid .objective-item:nth-child(2) { transition-delay: 0.18s; }
-.objectives-grid .objective-item:nth-child(3) { transition-delay: 0.30s; }
-.objectives-grid .objective-item:nth-child(4) { transition-delay: 0.42s; }
+.projects-card-grid .project-modern-card:nth-child(4) {
+  transition-delay: 0.15s;
+}
 
-.hero-metrics-bar .metric-stat-item:nth-child(1) { transition-delay: 0.08s; }
-.hero-metrics-bar .metric-stat-item:nth-child(2) { transition-delay: 0.20s; }
-.hero-metrics-bar .metric-stat-item:nth-child(3) { transition-delay: 0.32s; }
-.hero-metrics-bar .metric-stat-item:nth-child(4) { transition-delay: 0.44s; }
+.projects-card-grid .project-modern-card:nth-child(5) {
+  transition-delay: 0.28s;
+}
+
+.projects-card-grid .project-modern-card:nth-child(6) {
+  transition-delay: 0.42s;
+}
+
+.team-grid .team-card:nth-child(1) {
+  transition-delay: 0.05s;
+}
+
+.team-grid .team-card:nth-child(2) {
+  transition-delay: 0.16s;
+}
+
+.team-grid .team-card:nth-child(3) {
+  transition-delay: 0.28s;
+}
+
+.team-grid .team-card:nth-child(4) {
+  transition-delay: 0.40s;
+}
+
+.team-grid .team-card:nth-child(5) {
+  transition-delay: 0.52s;
+}
+
+.team-grid .team-card:nth-child(6) {
+  transition-delay: 0.64s;
+}
+
+.modern-pillar-list .modern-pillar-card:nth-child(1) {
+  transition-delay: 0.05s;
+}
+
+.modern-pillar-list .modern-pillar-card:nth-child(2) {
+  transition-delay: 0.14s;
+}
+
+.modern-pillar-list .modern-pillar-card:nth-child(3) {
+  transition-delay: 0.24s;
+}
+
+.modern-pillar-list .modern-pillar-card:nth-child(4) {
+  transition-delay: 0.34s;
+}
+
+.modern-pillar-list .modern-pillar-card:nth-child(5) {
+  transition-delay: 0.44s;
+}
+
+.objectives-grid .objective-item:nth-child(1) {
+  transition-delay: 0.06s;
+}
+
+.objectives-grid .objective-item:nth-child(2) {
+  transition-delay: 0.18s;
+}
+
+.objectives-grid .objective-item:nth-child(3) {
+  transition-delay: 0.30s;
+}
+
+.objectives-grid .objective-item:nth-child(4) {
+  transition-delay: 0.42s;
+}
+
+.hero-metrics-bar .metric-stat-item:nth-child(1) {
+  transition-delay: 0.08s;
+}
+
+.hero-metrics-bar .metric-stat-item:nth-child(2) {
+  transition-delay: 0.20s;
+}
+
+.hero-metrics-bar .metric-stat-item:nth-child(3) {
+  transition-delay: 0.32s;
+}
+
+.hero-metrics-bar .metric-stat-item:nth-child(4) {
+  transition-delay: 0.44s;
+}
 
 /* 4. Hero Slider Dynamic Text & Ken Burns Backdrop */
 .hero-bg-backdrop {
@@ -4606,6 +4740,7 @@ html {
     transform: translateY(32px);
     filter: blur(5px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -4626,22 +4761,18 @@ html {
 }
 
 .hero-highlight-glow {
-  background: linear-gradient(135deg, #4ade80 0%, #facc15 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.75), 0 4px 24px rgba(0, 0, 0, 0.6) !important;
+  filter: none !important;
   display: inline;
-  filter: drop-shadow(0 2px 20px rgba(74, 222, 128, 0.35));
 }
 
-/* Ambient Floating Glow Orbs in Hero */
+/* Ambient Floating Glow Orbs hidden to keep photo natural and clear like aercghana.org */
 .hero-glow-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(85px);
-  pointer-events: none;
-  z-index: 2;
-  opacity: 0.38;
-  animation: orbFloat 9s ease-in-out infinite alternate;
+  display: none !important;
 }
 
 .hero-glow-1 {
@@ -4662,8 +4793,13 @@ html {
 }
 
 @keyframes orbFloat {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(30px, -25px) scale(1.12); }
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  100% {
+    transform: translate(30px, -25px) scale(1.12);
+  }
 }
 
 /* Hero Slide Indicator Dots */
@@ -4698,31 +4834,32 @@ html {
 }
 
 /* 5. Button Shimmer & Arrow Bounce Micro-Interactions */
-.btn-primary, .header-partner-btn {
+.btn-primary,
+.header-partner-btn {
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-primary::after, .header-partner-btn::after {
+.btn-primary::after,
+.header-partner-btn::after {
   content: '';
   position: absolute;
   top: -60%;
   left: -70%;
   width: 60%;
   height: 220%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.28),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.28),
+      transparent);
   transform: rotate(25deg);
   transition: all 0.85s ease;
   pointer-events: none;
 }
 
-.btn-primary:hover::after, .header-partner-btn:hover::after {
+.btn-primary:hover::after,
+.header-partner-btn:hover::after {
   left: 140%;
 }
 
@@ -4731,23 +4868,35 @@ html {
   box-shadow: 0 12px 28px -4px rgba(16, 185, 129, 0.42);
 }
 
-.btn-primary:active, .header-partner-btn:active {
+.btn-primary:active,
+.header-partner-btn:active {
   transform: translateY(0) scale(0.99);
 }
 
-.btn-primary i, .btn-secondary i, .project-card-btn i, .header-partner-btn i, .pub-view-all-btn i {
+.btn-primary i,
+.btn-secondary i,
+.project-card-btn i,
+.header-partner-btn i,
+.pub-view-all-btn i {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.btn-primary:hover i, .btn-secondary:hover i, .project-card-btn:hover i, .header-partner-btn:hover i, .pub-view-all-btn:hover i {
+.btn-primary:hover i,
+.btn-secondary:hover i,
+.project-card-btn:hover i,
+.header-partner-btn:hover i,
+.pub-view-all-btn:hover i {
   transform: translateX(4px);
 }
 
 /* 6. Floating Badge Pills */
 @keyframes badgeFloat {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-3px);
   }
@@ -4765,10 +4914,13 @@ html {
 }
 
 @keyframes iconPulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
     opacity: 1;
   }
+
   50% {
     transform: scale(1.15);
     opacity: 0.85;
@@ -4788,6 +4940,7 @@ html {
     opacity: 0;
     transform: translateY(8px) scale(0.97);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -4820,7 +4973,7 @@ html {
 .project-modern-card:hover {
   transform: translateY(-10px) scale(1.015);
   box-shadow: 0 25px 50px -12px rgba(16, 185, 129, 0.28),
-              0 0 0 1px rgba(16, 185, 129, 0.35);
+    0 0 0 1px rgba(16, 185, 129, 0.35);
   border-color: #86efac;
 }
 
@@ -4840,7 +4993,7 @@ html {
 .team-card:hover {
   transform: translateY(-10px) scale(1.015);
   box-shadow: 0 24px 45px -10px rgba(15, 23, 42, 0.16),
-              0 0 0 1px rgba(16, 185, 129, 0.28);
+    0 0 0 1px rgba(16, 185, 129, 0.28);
   border-color: #86efac;
 }
 
@@ -4991,18 +5144,24 @@ html {
 
 /* 14. Floating Organic Parallax Badges */
 @keyframes floatSubtlePill {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-5px);
   }
 }
 
 @keyframes floatSubtleCard {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(6px);
   }
@@ -5024,9 +5183,11 @@ html {
 .team-card:hover .team-social-icon:nth-child(1) {
   transition-delay: 0.04s;
 }
+
 .team-card:hover .team-social-icon:nth-child(2) {
   transition-delay: 0.09s;
 }
+
 .team-card:hover .team-social-icon:nth-child(3) {
   transition-delay: 0.14s;
 }
@@ -5114,5 +5275,3 @@ html {
     font-size: 0.9rem;
   }
 }
-
-

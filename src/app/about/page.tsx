@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { GreenFocusAccordion, AccordionPillar } from '@/components/AboutFocusAccordions';
+import { getTeamMembers, getFocusAreas } from '@/db';
 
 export const metadata: Metadata = {
   title: 'About Us – Alliance for Empowering Rural Communities (AERC)',
@@ -60,36 +61,64 @@ const teamMembers = [
   {
     name: 'Desmond Sena Kofi Foe',
     role: 'Executive Director',
-    image: '/images/about/team-desmond.jpg',
+    image: 'https://aercghana.org/wp-content/uploads/2025/07/DESMOND.jpg',
   },
   {
     name: 'Carlisle Naa Dodua Dodoo',
-    role: 'Community-Led Adaptation Lead',
-    image: '/images/about/team-dodoo.jpg',
+    role: 'Communications and Media Officer',
+    image: 'https://aercghana.org/wp-content/uploads/2025/07/DODOA-1.jpg',
   },
   {
     name: 'Nicholas Selady Sekpey',
-    role: 'Renewable Energy Lead',
-    image: '/images/about/team-nicholas.jpg',
+    role: 'Energy Officer',
+    image: 'https://aercghana.org/wp-content/uploads/2025/07/1.jpg',
   },
   {
     name: 'Sandra Efua Attah Dickson',
-    role: 'Nature-Based Solutions Lead',
-    image: '/images/about/team-sandra.jpg',
+    role: 'Climate Officer',
+    image: 'https://aercghana.org/wp-content/uploads/2025/07/WhatsApp-Image-2026-05-25-at-2.38.19-PM-e1779720138791.jpeg',
   },
   {
     name: 'Yvette Ahenkorah',
-    role: 'Urban and Infrastructure Lead',
-    image: '/images/about/team-yvette.jpg',
+    role: 'Finance and Admin Manager',
+    image: 'https://aercghana.org/wp-content/uploads/2025/07/YVETTE-1.jpg',
   },
   {
     name: 'Siisi Ansah',
-    role: 'Volunteer',
-    image: '/images/about/team-siisi.jpg',
+    role: 'Volunteer Advocate',
+    image: 'https://aercghana.org/wp-content/uploads/2025/07/SIISI-1.jpg',
   },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const [dynamicMembers, allFocusAreas] = await Promise.all([
+    getTeamMembers(),
+    getFocusAreas(),
+  ]);
+  const displayTeam = dynamicMembers.length > 0 ? dynamicMembers : teamMembers;
+
+  const activeFocusAreas = allFocusAreas.filter((fa) => (fa.status || 'active') === 'active');
+  const envAreas = activeFocusAreas.filter((fa) => fa.parentPillar === 'Environment & Climate');
+  const energyAreas = activeFocusAreas.filter((fa) => fa.parentPillar === 'Energy Transition');
+
+  const displayEnvPillars: AccordionPillar[] = envAreas.length > 0
+    ? envAreas.map((fa) => ({
+        id: fa.slug,
+        title: fa.title,
+        summary: fa.summary,
+        slug: fa.slug,
+      }))
+    : environmentPillars;
+
+  const displayEnergyPillars: AccordionPillar[] = energyAreas.length > 0
+    ? energyAreas.map((fa) => ({
+        id: fa.slug,
+        title: fa.title,
+        summary: fa.summary,
+        slug: fa.slug,
+      }))
+    : energyPillars;
+
   return (
     <>
       {/* 1. BREADCRUMB HEADER */}
@@ -263,7 +292,7 @@ export default function AboutPage() {
                 climate justice, community empowerment, and sustainable development.
               </p>
 
-              <GreenFocusAccordion pillars={environmentPillars} defaultOpenId="env-1" />
+              <GreenFocusAccordion pillars={displayEnvPillars} defaultOpenId={displayEnvPillars[0]?.id} />
             </div>
           </div>
 
@@ -316,7 +345,7 @@ export default function AboutPage() {
                 systems that work for all.
               </p>
 
-              <GreenFocusAccordion pillars={energyPillars} defaultOpenId="energy-1" />
+              <GreenFocusAccordion pillars={displayEnergyPillars} defaultOpenId={displayEnergyPillars[0]?.id} />
             </div>
           </div>
 
@@ -383,7 +412,7 @@ export default function AboutPage() {
           </div>
 
           <div className="live-team-grid">
-            {teamMembers.map((member, idx) => (
+            {displayTeam.slice(0, 8).map((member, idx) => (
               <div key={idx} className="live-team-card reveal-item">
                 <div className="live-team-avatar">
                   <img src={member.image} alt={member.name} />
@@ -392,6 +421,17 @@ export default function AboutPage() {
                 <span className="live-team-role">{member.role}</span>
               </div>
             ))}
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '48px' }}>
+            <Link
+              href="/team"
+              className="btn-primary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '14px 30px' }}
+            >
+              <span>Explore Full Team &amp; Leadership Roster</span>
+              <i className="fa-solid fa-arrow-right"></i>
+            </Link>
           </div>
         </div>
       </section>

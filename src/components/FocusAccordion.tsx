@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
+import { FocusArea } from '@/db/schema';
+
 interface FocusPillar {
   id: string;
   number: string;
@@ -10,58 +12,83 @@ interface FocusPillar {
   summary: string;
   icon: string;
   tags: string[];
+  slug?: string;
 }
 
-const focusPillars: FocusPillar[] = [
+const defaultFocusPillars: FocusPillar[] = [
   {
-    id: 'environment-climate',
+    id: 'community-led-adaptation',
     number: '01',
-    title: 'Environment & Climate',
-    summary:
-      'We empower communities to build resilience, protect ecosystems, and create sustainable infrastructure that supports both people and the planet.',
-    icon: 'fa-earth-africa',
-    tags: ['Ecosystem Protection', 'Climate Resilience', 'Sustainable Infrastructure'],
-  },
-  {
-    id: 'community-adaptation',
-    number: '02',
     title: 'Community-Led Adaptation',
     summary:
-      'We believe lasting climate solutions must be owned and led by the communities they serve. We strengthen local leadership, build adaptive capacity, and ensure grassroots knowledge informs policy and practice. From training climate champions to supporting community-driven projects, we help people take charge of their resilience journey.',
+      'We believe lasting climate solutions must be owned and led by the communities they serve. We strengthen local leadership, build adaptive capacity, and ensure grassroots knowledge informs policy and practice.',
     icon: 'fa-users-line',
     tags: ['Local Leadership', 'Adaptive Capacity', 'Grassroots Policy'],
+    slug: 'community-led-adaptation',
   },
   {
-    id: 'nature-solutions',
-    number: '03',
+    id: 'nature-based-solutions',
+    number: '02',
     title: 'Nature-Based Solutions',
     summary:
-      'Healthy ecosystems are the foundation of climate resilience. We restore degraded lands, preserve biodiversity, and promote adaptation strategies rooted in nature. By protecting forests, wetlands, and mangroves, we strengthen natural defenses against climate impacts while creating livelihood opportunities for local communities.',
+      'Healthy ecosystems are the foundation of climate resilience. We restore degraded lands, preserve biodiversity, and promote adaptation strategies rooted in nature. By protecting forests, wetlands, and mangroves, we strengthen natural defenses.',
     icon: 'fa-seedling',
     tags: ['Reforestation', 'Wetland Conservation', 'Biodiversity'],
+    slug: 'nature-based-solutions',
   },
   {
-    id: 'urban-infrastructure',
-    number: '04',
-    title: 'Urban & Infrastructure Development',
+    id: 'renewable-energy',
+    number: '03',
+    title: 'Renewable Energy',
     summary:
-      'We promote inclusive, climate-resilient infrastructure that safeguards lives and livelihoods while supporting sustainable growth. This includes urban planning with green spaces, sustainable transport, and adaptive designs that protect vulnerable communities.',
-    icon: 'fa-city',
-    tags: ['Green Urban Spaces', 'Resilient Transport', 'Climate Planning'],
+      'Clean, affordable, and reliable energy is essential for poverty reduction and equitable development. We champion decentralized renewable energy systems that power homes, schools, and businesses while reducing fossil fuel dependence.',
+    icon: 'fa-solar-panel',
+    tags: ['Decentralized Power', 'Solar Mini-Grids', 'Clean Cooking'],
+    slug: 'renewable-energy',
   },
   {
-    id: 'plastics-waste',
+    id: 'fossil-fuel-finance-accountability',
+    number: '04',
+    title: 'Fossil Fuel Finance Accountability',
+    summary:
+      'We push for public and private investments to move away from fossil fuels toward sustainable and just alternatives. By tracking and challenging harmful energy financing, particularly through Export Credit Agencies (ECAs), we accelerate low-carbon transition.',
+    icon: 'fa-file-invoice-dollar',
+    tags: ['Divestment', 'Public Finance', 'ECA Tracking'],
+    slug: 'fossil-fuel-finance-accountability',
+  },
+  {
+    id: 'plastics-waste-management',
     number: '05',
     title: 'Plastics & Waste Management',
     summary:
-      'Plastic pollution and poor waste management threaten both people and ecosystems. We reduce plastic use, promote sustainable consumption, and advocate for producer responsibility. Through education, clean-ups, waste segregation, and circular economy initiatives, we turn waste into resources, protect ecosystems, and reduce greenhouse gas emissions.',
+      'Plastic pollution and poor waste management threaten both people and ecosystems. Through education, clean-ups, waste segregation, and circular economy initiatives, we turn waste into resources and protect frontline environments.',
     icon: 'fa-recycle',
     tags: ['Circular Economy', 'Zero Waste Action', 'Producer Responsibility'],
+    slug: 'plastics-waste-management',
   },
 ];
 
-export default function FocusAccordion() {
-  const [openId, setOpenId] = useState<string | null>('environment-climate');
+interface FocusAccordionProps {
+  focusAreas?: FocusArea[];
+}
+
+export default function FocusAccordion({ focusAreas }: FocusAccordionProps) {
+  const displayPillars: FocusPillar[] = focusAreas && focusAreas.length > 0
+    ? focusAreas
+        .filter((fa) => (fa.status || 'active') === 'active' && fa.isFeatured === 'yes')
+        .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0))
+        .map((fa, idx) => ({
+          id: fa.slug,
+          number: String(idx + 1).padStart(2, '0'),
+          title: fa.title,
+          summary: fa.summary,
+          icon: fa.icon || 'fa-leaf',
+          tags: fa.tags ? fa.tags.split(',').map((t) => t.trim()).slice(0, 3) : [fa.parentPillar],
+          slug: fa.slug,
+        }))
+    : defaultFocusPillars;
+
+  const [openId, setOpenId] = useState<string | null>(displayPillars[0]?.id || null);
 
   const toggle = (id: string) => {
     setOpenId(openId === id ? null : id);
@@ -69,9 +96,9 @@ export default function FocusAccordion() {
 
   return (
     <div className="modern-focus-container">
-      {/* 5 PILLAR ACCORDION CARDS */}
+      {/* PILLAR ACCORDION CARDS */}
       <div className="modern-pillar-list">
-        {focusPillars.map((pillar) => {
+        {displayPillars.map((pillar) => {
           const isOpen = openId === pillar.id;
           return (
             <div
@@ -113,6 +140,17 @@ export default function FocusAccordion() {
                         </span>
                       ))}
                     </div>
+                    {pillar.slug && (
+                      <div className="pt-2">
+                        <Link
+                          href={`/focus/${pillar.slug}`}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition group/link"
+                        >
+                          <span>Explore Focus Area Hub</span>
+                          <span className="transition-transform group-hover/link:translate-x-1">&rarr;</span>
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

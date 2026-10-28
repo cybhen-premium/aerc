@@ -102,9 +102,14 @@ export default function Footer() {
             <ul className="footer-links-list">
               <li><Link href="/">Home</Link></li>
               <li><Link href="/about">About Us</Link></li>
+              <li><Link href="/mission">Our Mission</Link></li>
+              <li><Link href="/vision">Our Vision</Link></li>
+              <li><Link href="/objectives">Objectives</Link></li>
+              <li><Link href="/how-we-work">How We Work</Link></li>
+              <li><Link href="/team">Our Team</Link></li>
               <li><Link href="/projects">Frontline Projects</Link></li>
               <li><Link href="/blog">Field Journal</Link></li>
-              <li><Link href="/resources">Publications & Policy</Link></li>
+              <li><Link href="/resources">Publications &amp; Policy</Link></li>
               <li><Link href="/events">Events &amp; Convenings</Link></li>
             </ul>
           </div>
@@ -113,9 +118,11 @@ export default function Footer() {
           <div>
             <h4 className="footer-col-title">Get Involved</h4>
             <ul className="footer-links-list">
+              <li><Link href="/donate" style={{ color: '#34d399', fontWeight: 700 }}><i className="fa-solid fa-heart" style={{ color: '#f43f5e', marginRight: '6px' }}></i>Donate &amp; Support</Link></li>
               <li><Link href="/partner">Become a Partner</Link></li>
               <li><Link href="/volunteer">Volunteer With Us</Link></li>
-              <li><Link href="/contact">Media & Press</Link></li>
+              <li><Link href="/faq">FAQ &amp; Knowledge Base</Link></li>
+              <li><Link href="/contact">Media &amp; Press</Link></li>
               <li><Link href="/contact">General Inquiries</Link></li>
             </ul>
           </div>
@@ -147,6 +154,10 @@ export default function Footer() {
             <span>Youth-Led &amp; Community-Driven</span>
             <span>•</span>
             <span>Accra, Ghana</span>
+            <span>•</span>
+            <Link href="/admin" className="hover:text-emerald-400 transition-colors opacity-75 hover:opacity-100">
+              Staff Portal
+            </Link>
           </div>
         </div>
       </div>

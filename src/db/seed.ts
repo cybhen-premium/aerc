@@ -61,7 +61,18 @@ async function seed() {
       category: blog.category,
       author: blog.author,
       publishedAt: blog.publishedAt,
-    }).onConflictDoNothing();
+    }).onConflictDoUpdate({
+      target: schema.blogPosts.slug,
+      set: {
+        title: blog.title,
+        excerpt: blog.excerpt,
+        content: blog.content,
+        coverImage: blog.coverImage,
+        category: blog.category,
+        author: blog.author,
+        publishedAt: blog.publishedAt,
+      },
+    });
   }
 
   console.log('✅ Neon Database seeded successfully!');

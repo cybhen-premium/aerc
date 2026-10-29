@@ -1,0 +1,252 @@
+/* ==========================================================================
+   AERC GHANA MANAGEMENT PORTAL — EXECUTIVE LIGHT MODE THEME SYSTEM
+   ========================================================================== */
+
+/* Main Page Container */
+.admin-light-mode {
+  background-color: #f8fafc !important; /* Tailwind slate-50 */
+  color: #0f172a !important;            /* Tailwind slate-900 */
+}
+
+/* Headings and High-Contrast Typography */
+.admin-light-mode h1,
+.admin-light-mode h2,
+.admin-light-mode h3,
+.admin-light-mode h4,
+.admin-light-mode h5,
+.admin-light-mode h6,
+.admin-light-mode .text-white {
+  color: #0f172a !important;
+}
+
+.admin-light-mode .text-slate-100,
+.admin-light-mode .text-slate-200 {
+  color: #1e293b !important; /* Tailwind slate-800 */
+}
+
+.admin-light-mode .text-slate-300,
+.admin-light-mode .text-slate-400 {
+  color: #475569 !important; /* Tailwind slate-600 */
+}
+
+.admin-light-mode .text-slate-500 {
+  color: #64748b !important; /* Tailwind slate-500 */
+}
+
+/* Base Cards, Modals, Panels, and Drawers */
+.admin-light-mode .bg-slate-900,
+.admin-light-mode .bg-slate-950,
+.admin-light-mode .bg-slate-900\/60,
+.admin-light-mode .bg-slate-900\/80,
+.admin-light-mode .bg-slate-900\/90,
+.admin-light-mode .bg-slate-900\/95,
+.admin-light-mode .bg-slate-900\/40 {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #e2e8f0 !important; /* Tailwind slate-200 */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+}
+
+/* Secondary Panels, Table Headers, Inset Boxes, and Card Footers */
+.admin-light-mode .bg-slate-800,
+.admin-light-mode .bg-slate-800\/80,
+.admin-light-mode .bg-slate-800\/60,
+.admin-light-mode .bg-slate-800\/50,
+.admin-light-mode .bg-slate-800\/40 {
+  background-color: #f1f5f9 !important; /* Tailwind slate-100 */
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Subtle Hover States */
+.admin-light-mode .hover\:bg-slate-800:hover,
+.admin-light-mode .hover\:bg-slate-800\/80:hover,
+.admin-light-mode .hover\:bg-slate-800\/60:hover,
+.admin-light-mode .hover\:bg-slate-700:hover {
+  background-color: #e2e8f0 !important; /* Tailwind slate-200 */
+  color: #0f172a !important;
+}
+
+/* Global Borders */
+.admin-light-mode .border-slate-800,
+.admin-light-mode .border-slate-700,
+.admin-light-mode .border-slate-700\/60,
+.admin-light-mode .border-slate-700\/40 {
+  border-color: #e2e8f0 !important; /* Tailwind slate-200 */
+}
+
+/* Form Inputs, Select Dropdowns, and Textareas */
+.admin-light-mode input[type="text"],
+.admin-light-mode input[type="email"],
+.admin-light-mode input[type="password"],
+.admin-light-mode input[type="url"],
+.admin-light-mode input[type="number"],
+.admin-light-mode input[type="tel"],
+.admin-light-mode input[type="date"],
+.admin-light-mode select,
+.admin-light-mode textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important; /* Tailwind slate-300 */
+}
+
+.admin-light-mode input::placeholder,
+.admin-light-mode textarea::placeholder {
+  color: #94a3b8 !important; /* Tailwind slate-400 */
+}
+
+.admin-light-mode input:focus,
+.admin-light-mode select:focus,
+.admin-light-mode textarea:focus {
+  border-color: #059669 !important; /* Emerald 600 */
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.15) !important;
+}
+
+/* Preserve White Text for Primary Solid Color Buttons */
+.admin-light-mode .bg-emerald-600,
+.admin-light-mode .bg-emerald-500,
+.admin-light-mode .bg-emerald-700,
+.admin-light-mode .bg-blue-600,
+.admin-light-mode .bg-blue-500,
+.admin-light-mode .bg-purple-600,
+.admin-light-mode .bg-red-600,
+.admin-light-mode .bg-rose-600,
+.admin-light-mode .btn-primary,
+.admin-light-mode .bg-amber-500 {
+  color: #ffffff !important;
+}
+
+.admin-light-mode .bg-emerald-600 *,
+.admin-light-mode .bg-emerald-500 *,
+.admin-light-mode .bg-blue-600 *,
+.admin-light-mode .bg-purple-600 *,
+.admin-light-mode .bg-red-600 * {
+  color: #ffffff !important;
+}
+
+/* Badge Color Systems — High Contrast Pastel Theme */
+.admin-light-mode .bg-emerald-950,
+.admin-light-mode .bg-emerald-950\/80,
+.admin-light-mode .bg-emerald-500\/10,
+.admin-light-mode .bg-emerald-500\/20 {
+  background-color: #ecfdf5 !important;
+  color: #047857 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.admin-light-mode .bg-amber-950,
+.admin-light-mode .bg-amber-950\/80,
+.admin-light-mode .bg-amber-500\/10,
+.admin-light-mode .bg-amber-500\/20 {
+  background-color: #fffbeb !important;
+  color: #b45309 !important;
+  border-color: #fde68a !important;
+}
+
+.admin-light-mode .bg-rose-950,
+.admin-light-mode .bg-rose-950\/80,
+.admin-light-mode .bg-rose-500\/10,
+.admin-light-mode .bg-rose-500\/20 {
+  background-color: #fff1f2 !important;
+  color: #be123c !important;
+  border-color: #fecdd3 !important;
+}
+
+.admin-light-mode .bg-blue-950,
+.admin-light-mode .bg-blue-950\/80,
+.admin-light-mode .bg-blue-500\/10,
+.admin-light-mode .bg-blue-500\/20 {
+  background-color: #eff6ff !important;
+  color: #1d4ed8 !important;
+  border-color: #bfdbfe !important;
+}
+
+.admin-light-mode .bg-purple-950,
+.admin-light-mode .bg-purple-950\/80,
+.admin-light-mode .bg-purple-500\/10,
+.admin-light-mode .bg-purple-500\/20 {
+  background-color: #faf5ff !important;
+  color: #7e22ce !important;
+  border-color: #e9d5ff !important;
+}
+
+.admin-light-mode .bg-teal-950,
+.admin-light-mode .bg-teal-950\/80,
+.admin-light-mode .bg-teal-500\/10,
+.admin-light-mode .bg-teal-500\/20 {
+  background-color: #f0fdfa !important;
+  color: #0f766e !important;
+  border-color: #99f6e4 !important;
+}
+
+.admin-light-mode .bg-indigo-950,
+.admin-light-mode .bg-indigo-950\/80,
+.admin-light-mode .bg-indigo-500\/10,
+.admin-light-mode .bg-indigo-500\/20 {
+  background-color: #eef2ff !important;
+  color: #4338ca !important;
+  border-color: #c7d2fe !important;
+}
+
+/* Sidebar Specific Overrides */
+.admin-light-mode aside {
+  background-color: #ffffff !important;
+  border-right-color: #e2e8f0 !important;
+}
+
+.admin-light-mode aside .text-white {
+  color: #0f172a !important;
+}
+
+.admin-light-mode aside .text-slate-300,
+.admin-light-mode aside .text-slate-400 {
+  color: #475569 !important;
+}
+
+.admin-light-mode aside .text-slate-500 {
+  color: #94a3b8 !important;
+}
+
+.admin-light-mode aside a:not(.bg-emerald-600):hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+.admin-light-mode aside .bg-slate-900\/60 {
+  background-color: #f8fafc !important;
+  border-top-color: #e2e8f0 !important;
+}
+
+/* Sticky Header */
+.admin-light-mode header {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+/* Table Elements */
+.admin-light-mode table {
+  background-color: #ffffff !important;
+}
+
+.admin-light-mode th {
+  background-color: #f8fafc !important;
+  color: #475569 !important;
+  border-bottom-color: #e2e8f0 !important;
+}
+
+.admin-light-mode td {
+  border-bottom-color: #f1f5f9 !important;
+  color: #1e293b !important;
+}
+
+.admin-light-mode tr:hover td {
+  background-color: #f8fafc !important;
+}
+
+/* Sticky Bottom Action Bars */
+.admin-light-mode .sticky.bottom-4 {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}

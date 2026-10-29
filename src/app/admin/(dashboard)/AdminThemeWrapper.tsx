@@ -43,20 +43,20 @@ export default function AdminThemeWrapper({
 
   return (
     <div
-      className={`min-h-screen flex transition-colors duration-200 ${
+      className={`h-screen flex overflow-hidden transition-colors duration-200 ${
         isLight
           ? 'admin-light-mode bg-slate-50 text-slate-900'
           : 'bg-slate-950 text-slate-100'
       }`}
     >
-      {/* Sidebar Navigation */}
+      {/* Sidebar Navigation - Permanently Static */}
       <AdminNav user={admin} />
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 min-h-screen overflow-y-auto">
+      {/* Main Content Area - Independently scrollable */}
+      <div className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto">
         {/* Top Sticky Header */}
         <header
-          className={`h-16 border-b px-6 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md transition-colors ${
+          className={`h-16 border-b px-6 flex items-center justify-between sticky top-0 z-20 backdrop-blur-md transition-colors shrink-0 ${
             isLight
               ? 'bg-white/90 border-slate-200 shadow-sm'
               : 'bg-slate-900/40 border-slate-800'
@@ -114,10 +114,10 @@ export default function AdminThemeWrapper({
         </header>
 
         {/* Dashboard Pages */}
-        <div className="p-6 md:p-8 max-w-7xl w-full mx-auto flex-1">
+        <main className="p-6 md:p-8 max-w-7xl w-full mx-auto flex-1">
           {children}
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

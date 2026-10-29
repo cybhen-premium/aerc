@@ -218,3 +218,19 @@
   border: 1px solid #e2e8f0 !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08) !important;
 }
+
+/* Subtle, Modern Slim Scrollbars */
+aside .overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+aside .overflow-y-auto::-webkit-scrollbar-track {
+  background: transparent;
+}
+aside .overflow-y-auto::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+aside .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+

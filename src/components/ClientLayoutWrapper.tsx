@@ -1,13 +1,23 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import TopBar from './TopBar';
 import Navigation from './Navigation';
 import OffcanvasSidebar from './OffcanvasSidebar';
 import Footer from './Footer';
+import type { SiteSettings } from '@/db/schema';
 
-export default function ClientLayoutWrapper({ children }: { children: React.ReactNode }) {
+interface ClientLayoutWrapperProps {
+  children: React.ReactNode;
+  siteSettings?: SiteSettings;
+}
+
+export default function ClientLayoutWrapper({
+  children,
+  siteSettings,
+}: ClientLayoutWrapperProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
 
@@ -46,7 +56,6 @@ export default function ClientLayoutWrapper({ children }: { children: React.Reac
 
       const rect = target.getBoundingClientRect();
       if (rect.top < window.innerHeight * 0.75 && rect.bottom > 0) {
-        // Trigger with slight delay so the browser paints the initial state and plays the entrance animation
         setTimeout(() => {
           target.classList.add('is-visible');
         }, 120);
@@ -76,13 +85,46 @@ export default function ClientLayoutWrapper({ children }: { children: React.Reac
     return <>{children}</>;
   }
 
+  // Maintenance Mode Guard for public visitors
+  if (siteSettings?.maintenanceMode && !pathname?.startsWith('/admin')) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-white flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-6 shadow-2xl shadow-emerald-950">
+          <i className="fa-solid fa-leaf text-3xl"></i>
+        </div>
+        <div className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-4">
+          Under Scheduled Maintenance
+        </div>
+        <h1 className="text-3xl font-extrabold tracking-tight mb-3">
+          {siteSettings.organizationShortName || 'AERC Ghana'}
+        </h1>
+        <p className="text-slate-400 max-w-lg mb-8 leading-relaxed text-sm">
+          {siteSettings.maintenanceNotice ||
+            'We are performing scheduled maintenance to enhance our community services. Please check back shortly.'}
+        </p>
+        <div className="flex items-center gap-4 text-xs text-slate-500">
+          <span>&copy; {new Date().getFullYear()} {siteSettings.organizationName}</span>
+          <span>&bull;</span>
+          <Link href="/admin" className="text-emerald-400 hover:underline">Staff Sign In</Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
-      <OffcanvasSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-      <TopBar />
-      <Navigation onOpenSidebar={() => setSidebarOpen(true)} />
+      <OffcanvasSidebar
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+        siteSettings={siteSettings}
+      />
+      <TopBar siteSettings={siteSettings} />
+      <Navigation
+        onOpenSidebar={() => setSidebarOpen(true)}
+        siteSettings={siteSettings}
+      />
       <main>{children}</main>
-      <Footer />
+      <Footer siteSettings={siteSettings} />
 
       {/* Modern Floating Back to Top Button */}
       <button

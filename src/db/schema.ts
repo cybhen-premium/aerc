@@ -463,6 +463,91 @@ export const homepageSettings = pgTable('homepage_settings', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 });
 
+// 16. Site & General Settings
+export const siteSettings = pgTable('site_settings', {
+  id: serial('id').primaryKey(),
+
+  // Organization Identity
+  organizationName: text('organization_name').default('Alliance for Empowering Rural Communities (AERC Ghana)').notNull(),
+  organizationShortName: varchar('organization_short_name', { length: 50 }).default('AERCGH').notNull(),
+  tagline: text('tagline').default('Advancing climate justice, energy transition, and grassroots resilience across Ghana'),
+  registrationNumber: varchar('registration_number', { length: 100 }).default('CG012342021 / DSW/8942'),
+  establishedYear: varchar('established_year', { length: 20 }).default('2019'),
+
+  // Visual Branding & Assets
+  logoUrl: text('logo_url').default('/images/logo-sidebar.png').notNull(),
+  logoDarkUrl: text('logo_dark_url').default('/images/logo-sidebar.png'),
+  faviconUrl: text('favicon_url').default('/images/logo-sidebar.png').notNull(),
+  primaryColor: varchar('primary_color', { length: 50 }).default('#059669'),
+  accentColor: varchar('accent_color', { length: 50 }).default('#047857'),
+
+  // Contact Channels
+  contactEmail: varchar('contact_email', { length: 255 }).default('info@aercghana.net').notNull(),
+  supportEmail: varchar('support_email', { length: 255 }).default('inquiries@aercghana.net'),
+  partnershipsEmail: varchar('partnerships_email', { length: 255 }).default('partnerships@aercghana.net'),
+  mediaEmail: varchar('media_email', { length: 255 }).default('press@aercghana.net'),
+  phonePrimary: varchar('phone_primary', { length: 50 }).default('+233 24 698 0091').notNull(),
+  phoneSecondary: varchar('phone_secondary', { length: 50 }).default('+233 24 512 7304'),
+  phoneWhatsapp: varchar('phone_whatsapp', { length: 50 }).default('+233 24 698 0091'),
+
+  // Physical Office Address
+  addressStreet: text('address_street').default('Afienya-Mataheko, opposite Grace Bio').notNull(),
+  addressCity: varchar('address_city', { length: 100 }).default('Greater Accra Region').notNull(),
+  addressCountry: varchar('address_country', { length: 100 }).default('Ghana').notNull(),
+  postalCode: varchar('postal_code', { length: 100 }).default('P.O. Box AF 124, Afienya'),
+  digitalAddressGps: varchar('digital_address_gps', { length: 100 }).default('GA-482-9012'),
+  workingHours: varchar('working_hours', { length: 100 }).default('Monday - Friday: 8:00 AM - 5:00 PM GMT'),
+
+  // Social Media Links
+  socialFacebook: text('social_facebook').default('https://www.facebook.com/aercgh'),
+  socialTwitter: text('social_twitter').default('https://x.com/aercgh'),
+  socialLinkedin: text('social_linkedin').default('https://www.linkedin.com/company/alliance-for-empowering-rural-communities'),
+  socialInstagram: text('social_instagram').default('https://www.instagram.com/ghanaaerc/'),
+  socialYoutube: text('social_youtube').default('https://www.youtube.com/@aercghana3755'),
+  socialWhatsappChannel: text('social_whatsapp_channel').default('https://whatsapp.com/channel/aercgh'),
+  socialGithub: text('social_github').default('https://github.com/aercgh'),
+  socialResearchGate: text('social_research_gate').default('https://www.researchgate.net/institution/AERC-Ghana'),
+
+  // Website Footer Information & Legal
+  footerBio: text('footer_bio').default('Alliance for Empowering Rural Communities (AERC) is a legally registered, youth-led nonprofit in Ghana. We work at the intersection of climate, energy justice, and ecosystem restoration, empowering frontline communities to lead sustainable African solutions.'),
+  footerCopyrightText: text('footer_copyright_text').default('Alliance for Empowering Rural Communities (AERC Ghana). All rights reserved.'),
+  footerBadgeText: varchar('footer_badge_text', { length: 255 }).default('Youth-Led & Community-Driven • Accra, Ghana'),
+  footerQuickLinksJson: text('footer_quick_links_json'),
+  privacyPolicySnippet: text('privacy_policy_snippet').default('We are dedicated to safeguarding the personal information and privacy rights of our community members, partners, and site visitors in accordance with Ghana Data Protection Act 2012 (Act 843).'),
+  privacyPolicyContent: text('privacy_policy_content'),
+  termsOfServiceContent: text('terms_of_service_content'),
+  disclaimerText: text('disclaimer_text').default('Alliance for Empowering Rural Communities (AERC Ghana) is an independent non-governmental organization committed to public interest advocacy and non-partisan grassroots development.'),
+
+  // Default SEO Metadata
+  defaultMetaTitle: text('default_meta_title').default('AERCGH – Alliance for Empowering Rural Communities | Climate & Energy Justice').notNull(),
+  defaultMetaDescription: text('default_meta_description').default('Alliance for Empowering Rural Communities (AERC) is a youth-led, frontline climate & energy justice organization empowering rural and marginalized African communities to shape resilient, sustainable futures.').notNull(),
+  defaultOgImage: text('default_og_image').default('/images/slider-1.jpg'),
+  defaultKeywords: text('default_keywords').default('AERC Ghana, climate justice, energy transition, rural communities, decentralized solar, agroecology, Ghana youth environmentalists'),
+  robotsIndex: varchar('robots_index', { length: 50 }).default('index, follow'),
+  googleAnalyticsId: varchar('google_analytics_id', { length: 50 }),
+  googleSiteVerification: varchar('google_site_verification', { length: 255 }),
+
+  // Display & Operational Preferences
+  itemsPerPage: integer('items_per_page').default(12),
+  dateFormat: varchar('date_format', { length: 50 }).default('MMMM D, YYYY'),
+  defaultLanguage: varchar('default_language', { length: 20 }).default('en'),
+  timezone: varchar('timezone', { length: 50 }).default('GMT (UTC+0)'),
+  maintenanceMode: boolean('maintenance_mode').default(false),
+  maintenanceNotice: text('maintenance_notice').default('We are performing scheduled maintenance to enhance our community portal. Please check back shortly.'),
+  allowPublicVolunteers: boolean('allow_public_volunteers').default(true),
+  allowPublicPartnerProposals: boolean('allow_public_partner_proposals').default(true),
+
+  // Notification Defaults
+  emailSenderName: varchar('email_sender_name', { length: 100 }).default('AERC Ghana Management'),
+  emailSenderAddress: varchar('email_sender_address', { length: 255 }).default('no-reply@aercghana.net'),
+  adminAlertEmail: varchar('admin_alert_email', { length: 255 }).default('admin@aercghana.net'),
+
+  // Audit
+  updatedBy: varchar('updated_by', { length: 255 }).default('Admin'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
 // Type definitions
 export type BlogPost = Omit<
   typeof blogPosts.$inferSelect,
@@ -817,3 +902,6 @@ export type HomepageSettings = Omit<
   updatedAt?: Date | null;
 };
 export type NewHomepageSettings = typeof homepageSettings.$inferInsert;
+
+export type SiteSettings = typeof siteSettings.$inferSelect;
+export type NewSiteSettings = typeof siteSettings.$inferInsert;

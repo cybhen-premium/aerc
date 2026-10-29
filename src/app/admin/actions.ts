@@ -55,6 +55,8 @@ import {
   getEnquiryNotificationSettings,
   updateEnquiryNotificationSettings,
   cleanupExpiredInquiries,
+  getSiteSettings,
+  updateSiteSettings,
 } from '@/db';
 import {
   verifyPassword,
@@ -2712,6 +2714,227 @@ export async function cleanupRetentionAction(): Promise<ActionResult> {
     return { success: false, error: 'Failed to run retention purge.' };
   }
 }
+
+/**
+ * -------------------------------------------------------------
+ * Module 12: General Website Settings Server Actions
+ * -------------------------------------------------------------
+ */
+
+export async function updateGeneralSettingsAction(formData: FormData): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    const organizationName = (formData.get('organizationName') as string)?.trim() || 'Alliance for Empowering Rural Communities (AERC Ghana)';
+    const organizationShortName = (formData.get('organizationShortName') as string)?.trim() || 'AERCGH';
+    const tagline = (formData.get('tagline') as string)?.trim() || '';
+    const registrationNumber = (formData.get('registrationNumber') as string)?.trim() || '';
+    const establishedYear = (formData.get('establishedYear') as string)?.trim() || '2019';
+
+    const logoUrl = (formData.get('logoUrl') as string)?.trim() || '/images/logo-sidebar.png';
+    const logoDarkUrl = (formData.get('logoDarkUrl') as string)?.trim() || '/images/logo-sidebar.png';
+    const faviconUrl = (formData.get('faviconUrl') as string)?.trim() || '/images/logo-sidebar.png';
+    const primaryColor = (formData.get('primaryColor') as string)?.trim() || '#059669';
+    const accentColor = (formData.get('accentColor') as string)?.trim() || '#047857';
+
+    const contactEmail = (formData.get('contactEmail') as string)?.trim() || 'info@aercghana.net';
+    const supportEmail = (formData.get('supportEmail') as string)?.trim() || '';
+    const partnershipsEmail = (formData.get('partnershipsEmail') as string)?.trim() || '';
+    const mediaEmail = (formData.get('mediaEmail') as string)?.trim() || '';
+    const phonePrimary = (formData.get('phonePrimary') as string)?.trim() || '+233 24 698 0091';
+    const phoneSecondary = (formData.get('phoneSecondary') as string)?.trim() || '';
+    const phoneWhatsapp = (formData.get('phoneWhatsapp') as string)?.trim() || '';
+
+    const addressStreet = (formData.get('addressStreet') as string)?.trim() || 'Afienya-Mataheko, opposite Grace Bio';
+    const addressCity = (formData.get('addressCity') as string)?.trim() || 'Greater Accra Region';
+    const addressCountry = (formData.get('addressCountry') as string)?.trim() || 'Ghana';
+    const postalCode = (formData.get('postalCode') as string)?.trim() || '';
+    const digitalAddressGps = (formData.get('digitalAddressGps') as string)?.trim() || '';
+    const workingHours = (formData.get('workingHours') as string)?.trim() || 'Monday - Friday: 8:00 AM - 5:00 PM GMT';
+
+    const socialFacebook = (formData.get('socialFacebook') as string)?.trim() || '';
+    const socialTwitter = (formData.get('socialTwitter') as string)?.trim() || '';
+    const socialLinkedin = (formData.get('socialLinkedin') as string)?.trim() || '';
+    const socialInstagram = (formData.get('socialInstagram') as string)?.trim() || '';
+    const socialYoutube = (formData.get('socialYoutube') as string)?.trim() || '';
+    const socialWhatsappChannel = (formData.get('socialWhatsappChannel') as string)?.trim() || '';
+    const socialGithub = (formData.get('socialGithub') as string)?.trim() || '';
+    const socialResearchGate = (formData.get('socialResearchGate') as string)?.trim() || '';
+
+    const footerBio = (formData.get('footerBio') as string)?.trim() || '';
+    const footerCopyrightText = (formData.get('footerCopyrightText') as string)?.trim() || '';
+    const footerBadgeText = (formData.get('footerBadgeText') as string)?.trim() || '';
+    const footerQuickLinksJson = (formData.get('footerQuickLinksJson') as string)?.trim() || null;
+    const privacyPolicySnippet = (formData.get('privacyPolicySnippet') as string)?.trim() || '';
+    const privacyPolicyContent = (formData.get('privacyPolicyContent') as string)?.trim() || null;
+    const termsOfServiceContent = (formData.get('termsOfServiceContent') as string)?.trim() || null;
+    const disclaimerText = (formData.get('disclaimerText') as string)?.trim() || '';
+
+    const defaultMetaTitle = (formData.get('defaultMetaTitle') as string)?.trim() || 'AERCGH – Alliance for Empowering Rural Communities | Climate & Energy Justice';
+    const defaultMetaDescription = (formData.get('defaultMetaDescription') as string)?.trim() || '';
+    const defaultOgImage = (formData.get('defaultOgImage') as string)?.trim() || '/images/slider-1.jpg';
+    const defaultKeywords = (formData.get('defaultKeywords') as string)?.trim() || '';
+    const robotsIndex = (formData.get('robotsIndex') as string)?.trim() || 'index, follow';
+    const googleAnalyticsId = (formData.get('googleAnalyticsId') as string)?.trim() || null;
+    const googleSiteVerification = (formData.get('googleSiteVerification') as string)?.trim() || null;
+
+    const itemsPerPageRaw = formData.get('itemsPerPage') as string;
+    const itemsPerPage = itemsPerPageRaw ? parseInt(itemsPerPageRaw, 10) : 12;
+    const dateFormat = (formData.get('dateFormat') as string)?.trim() || 'MMMM D, YYYY';
+    const defaultLanguage = (formData.get('defaultLanguage') as string)?.trim() || 'en';
+    const timezone = (formData.get('timezone') as string)?.trim() || 'GMT (UTC+0)';
+    const maintenanceMode = formData.get('maintenanceMode') === 'true' || formData.get('maintenanceMode') === 'on';
+    const maintenanceNotice = (formData.get('maintenanceNotice') as string)?.trim() || '';
+    const allowPublicVolunteers = formData.get('allowPublicVolunteers') !== 'false';
+    const allowPublicPartnerProposals = formData.get('allowPublicPartnerProposals') !== 'false';
+
+    const emailSenderName = (formData.get('emailSenderName') as string)?.trim() || 'AERC Ghana Management';
+    const emailSenderAddress = (formData.get('emailSenderAddress') as string)?.trim() || 'no-reply@aercghana.net';
+    const adminAlertEmail = (formData.get('adminAlertEmail') as string)?.trim() || 'admin@aercghana.net';
+
+    await updateSiteSettings({
+      organizationName,
+      organizationShortName,
+      tagline,
+      registrationNumber,
+      establishedYear,
+      logoUrl,
+      logoDarkUrl,
+      faviconUrl,
+      primaryColor,
+      accentColor,
+      contactEmail,
+      supportEmail,
+      partnershipsEmail,
+      mediaEmail,
+      phonePrimary,
+      phoneSecondary,
+      phoneWhatsapp,
+      addressStreet,
+      addressCity,
+      addressCountry,
+      postalCode,
+      digitalAddressGps,
+      workingHours,
+      socialFacebook,
+      socialTwitter,
+      socialLinkedin,
+      socialInstagram,
+      socialYoutube,
+      socialWhatsappChannel,
+      socialGithub,
+      socialResearchGate,
+      footerBio,
+      footerCopyrightText,
+      footerBadgeText,
+      footerQuickLinksJson,
+      privacyPolicySnippet,
+      privacyPolicyContent,
+      termsOfServiceContent,
+      disclaimerText,
+      defaultMetaTitle,
+      defaultMetaDescription,
+      defaultOgImage,
+      defaultKeywords,
+      robotsIndex,
+      googleAnalyticsId,
+      googleSiteVerification,
+      itemsPerPage,
+      dateFormat,
+      defaultLanguage,
+      timezone,
+      maintenanceMode,
+      maintenanceNotice,
+      allowPublicVolunteers,
+      allowPublicPartnerProposals,
+      emailSenderName,
+      emailSenderAddress,
+      adminAlertEmail,
+      updatedBy: session.name || session.email,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'settings',
+      'General Website Settings',
+      `Updated website identity (${organizationShortName}), branding, contact channels, and SEO metadata`
+    );
+
+    revalidatePath('/');
+    revalidatePath('/about');
+    revalidatePath('/contact');
+    revalidatePath('/privacy-policy');
+    revalidatePath('/terms');
+    revalidatePath('/admin/settings');
+
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update general settings:', error);
+    return { success: false, error: 'Failed to update website settings.' };
+  }
+}
+
+export async function toggleMaintenanceModeAction(enabled: boolean): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    await updateSiteSettings({
+      maintenanceMode: enabled,
+      updatedBy: session.name || session.email,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'settings',
+      'Maintenance Mode Switch',
+      `${enabled ? 'Enabled' : 'Disabled'} public website maintenance mode`
+    );
+
+    revalidatePath('/');
+    revalidatePath('/admin/settings');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to toggle maintenance mode:', error);
+    return { success: false, error: 'Failed to toggle maintenance mode.' };
+  }
+}
+
+export async function resetSiteSettingsAction(): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  if (session.role !== 'superadmin' && session.role !== 'super_admin') {
+    return { success: false, error: 'Only Super Administrators can reset default settings.' };
+  }
+
+  try {
+    const { initialSiteSettings } = await import('@/db');
+    await updateSiteSettings({
+      ...initialSiteSettings,
+      updatedBy: session.name || session.email,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'settings',
+      'Factory Defaults Reset',
+      'Restored system default general settings'
+    );
+
+    revalidatePath('/');
+    revalidatePath('/admin/settings');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to reset default settings:', error);
+    return { success: false, error: 'Failed to reset settings.' };
+  }
+}
+
 
 
 

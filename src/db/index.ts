@@ -1794,5 +1794,119 @@ export async function updateHomepageSettings(
   }
 }
 
+/**
+ * Site & General Settings Query & Mutation Handlers
+ */
+export const initialSiteSettings: schema.SiteSettings = {
+  id: 1,
+  organizationName: 'Alliance for Empowering Rural Communities (AERC Ghana)',
+  organizationShortName: 'AERCGH',
+  tagline: 'Advancing climate justice, energy transition, and grassroots resilience across Ghana',
+  registrationNumber: 'CG012342021 / DSW/8942',
+  establishedYear: '2019',
+  logoUrl: '/images/logo-sidebar.png',
+  logoDarkUrl: '/images/logo-sidebar.png',
+  faviconUrl: '/images/logo-sidebar.png',
+  primaryColor: '#059669',
+  accentColor: '#047857',
+  contactEmail: 'info@aercghana.net',
+  supportEmail: 'inquiries@aercghana.net',
+  partnershipsEmail: 'partnerships@aercghana.net',
+  mediaEmail: 'press@aercghana.net',
+  phonePrimary: '+233 24 698 0091',
+  phoneSecondary: '+233 24 512 7304',
+  phoneWhatsapp: '+233 24 698 0091',
+  addressStreet: 'Afienya-Mataheko, opposite Grace Bio',
+  addressCity: 'Greater Accra Region',
+  addressCountry: 'Ghana',
+  postalCode: 'P.O. Box AF 124, Afienya',
+  digitalAddressGps: 'GA-482-9012',
+  workingHours: 'Monday - Friday: 8:00 AM - 5:00 PM GMT',
+  socialFacebook: 'https://www.facebook.com/aercgh',
+  socialTwitter: 'https://x.com/aercgh',
+  socialLinkedin: 'https://www.linkedin.com/company/alliance-for-empowering-rural-communities',
+  socialInstagram: 'https://www.instagram.com/ghanaaerc/',
+  socialYoutube: 'https://www.youtube.com/@aercghana3755',
+  socialWhatsappChannel: 'https://whatsapp.com/channel/aercgh',
+  socialGithub: 'https://github.com/aercgh',
+  socialResearchGate: 'https://www.researchgate.net/institution/AERC-Ghana',
+  footerBio: 'Alliance for Empowering Rural Communities (AERC) is a legally registered, youth-led nonprofit in Ghana. We work at the intersection of climate, energy justice, and ecosystem restoration, empowering frontline communities to lead sustainable African solutions.',
+  footerCopyrightText: 'Alliance for Empowering Rural Communities (AERC Ghana). All rights reserved.',
+  footerBadgeText: 'Youth-Led & Community-Driven • Accra, Ghana',
+  footerQuickLinksJson: null,
+  privacyPolicySnippet: 'We are dedicated to safeguarding the personal information and privacy rights of our community members, partners, and site visitors in accordance with Ghana Data Protection Act 2012 (Act 843).',
+  privacyPolicyContent: null,
+  termsOfServiceContent: null,
+  disclaimerText: 'Alliance for Empowering Rural Communities (AERC Ghana) is an independent non-governmental organization committed to public interest advocacy and non-partisan grassroots development.',
+  defaultMetaTitle: 'AERCGH – Alliance for Empowering Rural Communities | Climate & Energy Justice',
+  defaultMetaDescription: 'Alliance for Empowering Rural Communities (AERC) is a youth-led, frontline climate & energy justice organization empowering rural and marginalized African communities to shape resilient, sustainable futures.',
+  defaultOgImage: '/images/slider-1.jpg',
+  defaultKeywords: 'AERC Ghana, climate justice, energy transition, rural communities, decentralized solar, agroecology, Ghana youth environmentalists',
+  robotsIndex: 'index, follow',
+  googleAnalyticsId: null,
+  googleSiteVerification: null,
+  itemsPerPage: 12,
+  dateFormat: 'MMMM D, YYYY',
+  defaultLanguage: 'en',
+  timezone: 'GMT (UTC+0)',
+  maintenanceMode: false,
+  maintenanceNotice: 'We are performing scheduled maintenance to enhance our community portal. Please check back shortly.',
+  allowPublicVolunteers: true,
+  allowPublicPartnerProposals: true,
+  emailSenderName: 'AERC Ghana Management',
+  emailSenderAddress: 'no-reply@aercghana.net',
+  adminAlertEmail: 'admin@aercghana.net',
+  updatedBy: 'Admin',
+  updatedAt: new Date(),
+  createdAt: new Date(),
+};
+
+export async function getSiteSettings(): Promise<schema.SiteSettings> {
+  if (!db) return initialSiteSettings;
+  try {
+    const res = await db.select().from(schema.siteSettings).where(eq(schema.siteSettings.id, 1)).limit(1);
+    if (res.length > 0 && res[0]) {
+      return res[0];
+    }
+    return initialSiteSettings;
+  } catch (error) {
+    console.warn('Database query failed for siteSettings, using fallback:', error);
+    return initialSiteSettings;
+  }
+}
+
+export async function updateSiteSettings(
+  data: Partial<schema.NewSiteSettings>
+): Promise<schema.SiteSettings | null> {
+  if (!db) return null;
+  try {
+    const existing = await db.select().from(schema.siteSettings).where(eq(schema.siteSettings.id, 1)).limit(1);
+    if (existing.length === 0) {
+      const inserted = await db.insert(schema.siteSettings).values({
+        ...initialSiteSettings,
+        ...data,
+        id: 1,
+        updatedAt: new Date(),
+      }).returning();
+      return inserted[0] || null;
+    }
+
+    const updated = await db
+      .update(schema.siteSettings)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.siteSettings.id, 1))
+      .returning();
+
+    return updated[0] || null;
+  } catch (error) {
+    console.error('Failed to update site settings:', error);
+    throw error;
+  }
+}
+
+
 
 

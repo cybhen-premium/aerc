@@ -285,6 +285,73 @@ async function main() {
     );
   `;
 
+  // 4k. Site & General Settings
+  await sql`
+    CREATE TABLE IF NOT EXISTS site_settings (
+      id SERIAL PRIMARY KEY,
+      organization_name TEXT DEFAULT 'Alliance for Empowering Rural Communities (AERC Ghana)' NOT NULL,
+      organization_short_name VARCHAR(50) DEFAULT 'AERCGH' NOT NULL,
+      tagline TEXT DEFAULT 'Advancing climate justice, energy transition, and grassroots resilience across Ghana',
+      registration_number VARCHAR(100) DEFAULT 'CG012342021 / DSW/8942',
+      established_year VARCHAR(20) DEFAULT '2019',
+      logo_url TEXT DEFAULT '/images/logo-sidebar.png' NOT NULL,
+      logo_dark_url TEXT DEFAULT '/images/logo-sidebar.png',
+      favicon_url TEXT DEFAULT '/images/logo-sidebar.png' NOT NULL,
+      primary_color VARCHAR(50) DEFAULT '#059669',
+      accent_color VARCHAR(50) DEFAULT '#047857',
+      contact_email VARCHAR(255) DEFAULT 'info@aercghana.net' NOT NULL,
+      support_email VARCHAR(255) DEFAULT 'inquiries@aercghana.net',
+      partnerships_email VARCHAR(255) DEFAULT 'partnerships@aercghana.net',
+      media_email VARCHAR(255) DEFAULT 'press@aercghana.net',
+      phone_primary VARCHAR(50) DEFAULT '+233 24 698 0091' NOT NULL,
+      phone_secondary VARCHAR(50) DEFAULT '+233 24 512 7304',
+      phone_whatsapp VARCHAR(50) DEFAULT '+233 24 698 0091',
+      address_street TEXT DEFAULT 'Afienya-Mataheko, opposite Grace Bio' NOT NULL,
+      address_city VARCHAR(100) DEFAULT 'Greater Accra Region' NOT NULL,
+      address_country VARCHAR(100) DEFAULT 'Ghana' NOT NULL,
+      postal_code VARCHAR(100) DEFAULT 'P.O. Box AF 124, Afienya',
+      digital_address_gps VARCHAR(100) DEFAULT 'GA-482-9012',
+      working_hours VARCHAR(100) DEFAULT 'Monday - Friday: 8:00 AM - 5:00 PM GMT',
+      social_facebook TEXT DEFAULT 'https://www.facebook.com/aercgh',
+      social_twitter TEXT DEFAULT 'https://x.com/aercgh',
+      social_linkedin TEXT DEFAULT 'https://www.linkedin.com/company/alliance-for-empowering-rural-communities',
+      social_instagram TEXT DEFAULT 'https://www.instagram.com/ghanaaerc/',
+      social_youtube TEXT DEFAULT 'https://www.youtube.com/@aercghana3755',
+      social_whatsapp_channel TEXT DEFAULT 'https://whatsapp.com/channel/aercgh',
+      social_github TEXT DEFAULT 'https://github.com/aercgh',
+      social_research_gate TEXT DEFAULT 'https://www.researchgate.net/institution/AERC-Ghana',
+      footer_bio TEXT DEFAULT 'Alliance for Empowering Rural Communities (AERC) is a legally registered, youth-led nonprofit in Ghana. We work at the intersection of climate, energy justice, and ecosystem restoration, empowering frontline communities to lead sustainable African solutions.',
+      footer_copyright_text TEXT DEFAULT 'Alliance for Empowering Rural Communities (AERC Ghana). All rights reserved.',
+      footer_badge_text VARCHAR(255) DEFAULT 'Youth-Led & Community-Driven • Accra, Ghana',
+      footer_quick_links_json TEXT,
+      privacy_policy_snippet TEXT DEFAULT 'We are dedicated to safeguarding the personal information and privacy rights of our community members, partners, and site visitors in accordance with Ghana Data Protection Act 2012 (Act 843).',
+      privacy_policy_content TEXT,
+      terms_of_service_content TEXT,
+      disclaimer_text TEXT DEFAULT 'Alliance for Empowering Rural Communities (AERC Ghana) is an independent non-governmental organization committed to public interest advocacy and non-partisan grassroots development.',
+      default_meta_title TEXT DEFAULT 'AERCGH – Alliance for Empowering Rural Communities | Climate & Energy Justice' NOT NULL,
+      default_meta_description TEXT DEFAULT 'Alliance for Empowering Rural Communities (AERC) is a youth-led, frontline climate & energy justice organization empowering rural and marginalized African communities to shape resilient, sustainable futures.' NOT NULL,
+      default_og_image TEXT DEFAULT '/images/slider-1.jpg',
+      default_keywords TEXT DEFAULT 'AERC Ghana, climate justice, energy transition, rural communities, decentralized solar, agroecology, Ghana youth environmentalists',
+      robots_index VARCHAR(50) DEFAULT 'index, follow',
+      google_analytics_id VARCHAR(50),
+      google_site_verification VARCHAR(255),
+      items_per_page INT DEFAULT 12,
+      date_format VARCHAR(50) DEFAULT 'MMMM D, YYYY',
+      default_language VARCHAR(20) DEFAULT 'en',
+      timezone VARCHAR(50) DEFAULT 'GMT (UTC+0)',
+      maintenance_mode BOOLEAN DEFAULT FALSE,
+      maintenance_notice TEXT DEFAULT 'We are performing scheduled maintenance to enhance our community portal. Please check back shortly.',
+      allow_public_volunteers BOOLEAN DEFAULT TRUE,
+      allow_public_partner_proposals BOOLEAN DEFAULT TRUE,
+      email_sender_name VARCHAR(100) DEFAULT 'AERC Ghana Management',
+      email_sender_address VARCHAR(255) DEFAULT 'no-reply@aercghana.net',
+      admin_alert_email VARCHAR(255) DEFAULT 'admin@aercghana.net',
+      updated_by VARCHAR(255) DEFAULT 'Admin',
+      updated_at TIMESTAMP DEFAULT NOW() NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    );
+  `;
+
   // 5. Add columns if not exist
   await sql`ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'published';`;
   await sql`ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`;
@@ -792,6 +859,85 @@ async function main() {
       `;
     }
     console.log(`✅ Seeded ${demoInquiries.length} demonstration contact inquiries.`);
+  }
+
+  // 16. Seed Site Settings if not present
+  const [existingSiteSettings] = await sql`SELECT count(*)::int as count FROM site_settings;`;
+  if (existingSiteSettings.count === 0) {
+    console.log('Seeding initial Site & General Settings...');
+    await sql`
+      INSERT INTO site_settings (
+        id, organization_name, organization_short_name, tagline, registration_number, established_year,
+        logo_url, logo_dark_url, favicon_url, primary_color, accent_color,
+        contact_email, support_email, partnerships_email, media_email,
+        phone_primary, phone_secondary, phone_whatsapp,
+        address_street, address_city, address_country, postal_code, digital_address_gps, working_hours,
+        social_facebook, social_twitter, social_linkedin, social_instagram, social_youtube, social_whatsapp_channel, social_github, social_research_gate,
+        footer_bio, footer_copyright_text, footer_badge_text,
+        privacy_policy_snippet, privacy_policy_content, terms_of_service_content, disclaimer_text,
+        default_meta_title, default_meta_description, default_og_image, default_keywords,
+        robots_index, items_per_page, date_format, default_language, timezone,
+        maintenance_mode, maintenance_notice, allow_public_volunteers, allow_public_partner_proposals,
+        email_sender_name, email_sender_address, admin_alert_email
+      ) VALUES (
+        1,
+        'Alliance for Empowering Rural Communities (AERC Ghana)',
+        'AERCGH',
+        'Advancing climate justice, energy transition, and grassroots resilience across Ghana',
+        'CG012342021 / DSW/8942',
+        '2019',
+        '/images/logo-sidebar.png',
+        '/images/logo-sidebar.png',
+        '/images/logo-sidebar.png',
+        '#059669',
+        '#047857',
+        'info@aercghana.net',
+        'inquiries@aercghana.net',
+        'partnerships@aercghana.net',
+        'press@aercghana.net',
+        '+233 24 698 0091',
+        '+233 24 512 7304',
+        '+233 24 698 0091',
+        'Afienya-Mataheko, opposite Grace Bio',
+        'Greater Accra Region',
+        'Ghana',
+        'P.O. Box AF 124, Afienya',
+        'GA-482-9012',
+        'Monday - Friday: 8:00 AM - 5:00 PM GMT',
+        'https://www.facebook.com/aercgh',
+        'https://x.com/aercgh',
+        'https://www.linkedin.com/company/alliance-for-empowering-rural-communities',
+        'https://www.instagram.com/ghanaaerc/',
+        'https://www.youtube.com/@aercghana3755',
+        'https://whatsapp.com/channel/aercgh',
+        'https://github.com/aercgh',
+        'https://www.researchgate.net/institution/AERC-Ghana',
+        'Alliance for Empowering Rural Communities (AERC) is a legally registered, youth-led nonprofit in Ghana. We work at the intersection of climate, energy justice, and ecosystem restoration, empowering frontline communities to lead sustainable African solutions.',
+        'Alliance for Empowering Rural Communities (AERC Ghana). All rights reserved.',
+        'Youth-Led & Community-Driven • Accra, Ghana',
+        'We are dedicated to safeguarding the personal information and privacy rights of our community members, partners, and site visitors in accordance with Ghana Data Protection Act 2012 (Act 843).',
+        '# Privacy Policy\n\n**Effective Date:** January 1, 2026\n\nAlliance for Empowering Rural Communities (AERC Ghana) respects your privacy and is committed to protecting your personal data. This privacy notice explains how we collect, store, and manage personal data when you interact with our website, submit inquiries, apply as a partner or volunteer, or donate.\n\n## 1. Information We Collect\nWe may collect personal identification information including your full name, email address, phone number, institutional affiliation, and any details submitted via our contact, volunteer, and partner forms.\n\n## 2. Legal Basis & Use of Data\nWe process personal data under the Ghana Data Protection Act 2012 (Act 843) for communication, newsletter distribution with your explicit consent, processing partner applications, and improving our community engagement.\n\n## 3. Data Retention & Security\nPersonal enquiries and application records are retained for administrative follow-up and compliance in accordance with our data retention schedule (default 365 days). We implement strict role-based access controls to prevent unauthorized access.\n\n## 4. Contact Data Protection Officer\nFor inquiries regarding your personal data or to request data rectification or erasure, contact our data compliance desk at info@aercghana.net.',
+        '# Terms of Service\n\n**Effective Date:** January 1, 2026\n\nWelcome to the official website of Alliance for Empowering Rural Communities (AERC Ghana). By accessing or using this portal, you agree to comply with and be bound by these terms.\n\n## 1. Non-Commercial & Educational Use\nContent, research reports, datasets, and articles provided on this portal are published for environmental education, scientific policy research, and public advocacy under Open Access principles.\n\n## 2. Intellectual Property & Attribution\nAll materials produced by AERC Ghana may be referenced or shared with appropriate attribution to "Alliance for Empowering Rural Communities (AERC Ghana)".\n\n## 3. Disclaimers\nThe information on this portal is provided in good faith. AERC Ghana strives for accuracy but makes no warranties regarding completeness or uninterrupted availability of third-party external links.\n\n## 4. Governing Law\nThese terms are governed by and construed in accordance with the laws of the Republic of Ghana.',
+        'Alliance for Empowering Rural Communities (AERC Ghana) is an independent non-governmental organization committed to public interest advocacy and non-partisan grassroots development.',
+        'AERCGH – Alliance for Empowering Rural Communities | Climate & Energy Justice',
+        'Alliance for Empowering Rural Communities (AERC) is a youth-led, frontline climate & energy justice organization empowering rural and marginalized African communities to shape resilient, sustainable futures.',
+        '/images/slider-1.jpg',
+        'AERC Ghana, climate justice, energy transition, rural communities, decentralized solar, agroecology, Ghana youth environmentalists',
+        'index, follow',
+        12,
+        'MMMM D, YYYY',
+        'en',
+        'GMT (UTC+0)',
+        false,
+        'We are performing scheduled maintenance to enhance our community portal. Please check back shortly.',
+        true,
+        true,
+        'AERC Ghana Management',
+        'no-reply@aercghana.net',
+        'admin@aercghana.net'
+      );
+    `;
+    console.log('✅ Seeded initial Site & General Settings.');
   }
 
   console.log('🎉 Complete database synchronization successful!');

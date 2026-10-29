@@ -21,6 +21,7 @@ import {
   Target,
   Image as ImageIcon,
   SlidersHorizontal,
+  Settings,
 } from 'lucide-react';
 import { logoutAdminAction } from '../actions';
 import { hasPermission, getRoleBadge } from '@/lib/permissions';
@@ -52,6 +53,7 @@ export default function AdminNav({ user }: AdminNavProps) {
     { href: '/admin/volunteers', label: 'Volunteer Roster', icon: Users, permission: 'volunteers' },
     { href: '/admin/subscribers', label: 'Newsletter Subscribers', icon: Mail, permission: 'subscribers' },
     { href: '/admin/users', label: 'Admin Users & Roles', icon: Shield, permission: 'users' },
+    { href: '/admin/settings', label: 'General Settings', icon: Settings, permission: 'settings' },
   ];
 
   const navLinks = allNavLinks.filter((item) => {

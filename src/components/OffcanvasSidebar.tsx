@@ -1,13 +1,19 @@
 'use client';
 
 import Link from 'next/link';
+import type { SiteSettings } from '@/db/schema';
 
 interface OffcanvasSidebarProps {
   isOpen: boolean;
   onClose: () => void;
+  siteSettings?: SiteSettings;
 }
 
-export default function OffcanvasSidebar({ isOpen, onClose }: OffcanvasSidebarProps) {
+export default function OffcanvasSidebar({ isOpen, onClose, siteSettings }: OffcanvasSidebarProps) {
+  const logoUrl = siteSettings?.logoUrl || '/images/logo-sidebar.png';
+  const shortName = siteSettings?.organizationShortName || 'AERCGH';
+  const orgName = siteSettings?.organizationName || 'Alliance for Empowering Rural Communities';
+
   return (
     <>
       <div 
@@ -27,16 +33,16 @@ export default function OffcanvasSidebar({ isOpen, onClose }: OffcanvasSidebarPr
         <div style={{ marginBottom: '28px' }}>
           <Link href="/" onClick={onClose} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
             <img 
-              src="/images/logo-sidebar.png" 
-              alt="AERCGH Logo" 
+              src={logoUrl} 
+              alt={`${shortName} Logo`} 
               style={{ height: '46px', width: '46px', borderRadius: '50%', objectFit: 'contain', boxShadow: '0 2px 8px rgba(16, 185, 129, 0.2)' }} 
             />
             <div style={{ display: 'flex', flexDirection: 'column' }}>
               <span style={{ fontFamily: 'var(--font-heading)', fontWeight: 800, fontSize: '1.25rem', color: 'var(--slate-900)', lineHeight: 1.1 }}>
-                AERCGH
+                {shortName}
               </span>
               <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.65rem', fontWeight: 600, textTransform: 'uppercase', color: 'var(--emerald-600)', letterSpacing: '0.04em' }}>
-                Alliance for Empowering Rural Communities
+                {orgName}
               </span>
             </div>
           </Link>

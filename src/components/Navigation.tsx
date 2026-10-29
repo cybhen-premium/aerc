@@ -4,13 +4,20 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import type { SiteSettings } from '@/db/schema';
+
 interface NavigationProps {
   onOpenSidebar: () => void;
+  siteSettings?: SiteSettings;
 }
 
-export default function Navigation({ onOpenSidebar }: NavigationProps) {
+export default function Navigation({ onOpenSidebar, siteSettings }: NavigationProps) {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+
+  const logoUrl = siteSettings?.logoUrl || '/images/logo-sidebar.png';
+  const shortName = siteSettings?.organizationShortName || 'AERCGH';
+  const orgName = siteSettings?.organizationName || 'Alliance for Empowering Rural Communities';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,11 +39,11 @@ export default function Navigation({ onOpenSidebar }: NavigationProps) {
       <div className="header-container">
         {/* Brand Logo & Title */}
         <div className="header-brand">
-          <Link href="/" className="brand-logo-link" aria-label="AERCGH Home">
-            <img src="/images/logo-sidebar.png" alt="AERCGH Logo" className="header-logo-img" />
+          <Link href="/" className="brand-logo-link" aria-label={`${shortName} Home`}>
+            <img src={logoUrl} alt={`${shortName} Logo`} className="header-logo-img" />
             <div className="brand-logo-text">
-              <span className="brand-logo-title">AERCGH</span>
-              <span className="brand-logo-desc">Alliance for Empowering Rural Communities</span>
+              <span className="brand-logo-title">{shortName}</span>
+              <span className="brand-logo-desc">{orgName}</span>
             </div>
           </Link>
         </div>

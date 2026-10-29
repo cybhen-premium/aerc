@@ -1,13 +1,28 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import ContactForm from '@/components/ContactForm';
+import { getSiteSettings } from '@/db';
 
-export const metadata: Metadata = {
-  title: 'Contact Us – AERCGH',
-  description: 'Get in touch with Alliance for Empowering Rural Communities (AERC) in Greater Accra, Ghana. Submit inquiries, project collaborations, or visit our office.',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: `Contact Us – ${settings.organizationShortName || 'AERCGH'}`,
+    description: `Get in touch with ${settings.organizationName} in Greater Accra, Ghana. Submit inquiries, project collaborations, or visit our frontline office.`,
+  };
+}
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const settings = await getSiteSettings();
+
+  const address = settings.addressStreet
+    ? `${settings.addressStreet}, ${settings.addressCity}, ${settings.addressCountry}.`
+    : 'Afienya-Mataheko, opposite Grace Bio, Greater Accra Region, Ghana.';
+  const phones = settings.phonePrimary
+    ? `${settings.phonePrimary}${settings.phoneSecondary ? ` / ${settings.phoneSecondary}` : ''}`
+    : '+233246980091 / +233245127304';
+  const email = settings.contactEmail || 'info@aercghana.net';
+  const gps = settings.digitalAddressGps;
+
   return (
     <>
       {/* BREADCRUMB HEADER */}
@@ -51,7 +66,12 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 style={{ fontSize: '1rem', color: 'white', marginBottom: '4px', fontWeight: 600 }}>Location</h4>
-                      <p style={{ fontSize: '0.92rem', color: '#abb8c3', margin: 0, lineHeight: 1.5 }}>Afienya-Mataheko, opposite Grace Bio, Greater Accra Region, Ghana.</p>
+                      <p style={{ fontSize: '0.92rem', color: '#abb8c3', margin: 0, lineHeight: 1.5 }}>{address}</p>
+                      {gps && (
+                        <p style={{ fontSize: '0.8rem', color: 'var(--primary-green)', margin: '4px 0 0 0', fontWeight: 600 }}>
+                          GPS Digital Address: {gps}
+                        </p>
+                      )}
                     </div>
                   </li>
                   <li style={{ display: 'flex', gap: '18px', alignItems: 'flex-start' }}>
@@ -60,7 +80,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 style={{ fontSize: '1rem', color: 'white', marginBottom: '4px', fontWeight: 600 }}>Phone Number</h4>
-                      <p style={{ fontSize: '0.92rem', color: '#abb8c3', margin: 0, lineHeight: 1.5 }}>+233246980091 / +233245127304</p>
+                      <p style={{ fontSize: '0.92rem', color: '#abb8c3', margin: 0, lineHeight: 1.5 }}>{phones}</p>
                     </div>
                   </li>
                   <li style={{ display: 'flex', gap: '18px', alignItems: 'flex-start' }}>
@@ -69,7 +89,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <h4 style={{ fontSize: '1rem', color: 'white', marginBottom: '4px', fontWeight: 600 }}>Email Address</h4>
-                      <p style={{ fontSize: '0.92rem', color: '#abb8c3', margin: 0, lineHeight: 1.5 }}>Info@aercghana.net</p>
+                      <p style={{ fontSize: '0.92rem', color: '#abb8c3', margin: 0, lineHeight: 1.5 }}>{email}</p>
                     </div>
                   </li>
                 </ul>

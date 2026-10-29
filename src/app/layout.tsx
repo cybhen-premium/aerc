@@ -1,20 +1,36 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import ClientLayoutWrapper from '@/components/ClientLayoutWrapper';
+import { getSiteSettings } from '@/db';
 
-export const metadata: Metadata = {
-  title: 'AERCGH – Alliance for Empowering Rural Communities',
-  description: 'Alliance for Empowering Rural Communities (AERC) is a youth-led, frontline climate & energy justice organization empowering rural and marginalized African communities to shape resilient, sustainable futures.',
-  icons: {
-    icon: '/images/logo-sidebar.png',
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
 
-export default function RootLayout({
+  return {
+    title: settings.defaultMetaTitle || 'AERCGH – Alliance for Empowering Rural Communities',
+    description:
+      settings.defaultMetaDescription ||
+      'Alliance for Empowering Rural Communities (AERC) is a youth-led, frontline climate & energy justice organization empowering rural and marginalized African communities to shape resilient, sustainable futures.',
+    icons: {
+      icon: settings.faviconUrl || '/images/logo-sidebar.png',
+      shortcut: settings.faviconUrl || '/images/logo-sidebar.png',
+      apple: settings.faviconUrl || '/images/logo-sidebar.png',
+    },
+    openGraph: {
+      title: settings.defaultMetaTitle || 'AERCGH – Alliance for Empowering Rural Communities',
+      description: settings.defaultMetaDescription || 'Frontline climate and energy justice across rural Africa.',
+      images: [settings.defaultOgImage || '/images/slider-1.jpg'],
+    },
+  };
+}
+
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const settings = await getSiteSettings();
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -30,7 +46,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <ClientLayoutWrapper>{children}</ClientLayoutWrapper>
+        <ClientLayoutWrapper siteSettings={settings}>{children}</ClientLayoutWrapper>
       </body>
     </html>
   );

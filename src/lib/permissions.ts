@@ -50,6 +50,7 @@ export const SYSTEM_ROLES: Record<string, RoleConfig> = {
       'volunteers',
       'subscribers',
       'users',
+      'settings',
     ],
   },
   editor: {

@@ -20,6 +20,7 @@ import {
   Shield,
   Target,
   Image as ImageIcon,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { logoutAdminAction } from '../actions';
 
@@ -36,6 +37,7 @@ export default function AdminNav({ user }: AdminNavProps) {
 
   const navLinks = [
     { href: '/admin', label: 'Dashboard Overview', icon: LayoutDashboard },
+    { href: '/admin/homepage', label: 'Homepage Manager', icon: SlidersHorizontal },
     { href: '/admin/pages', label: 'Website Pages', icon: Globe },
     { href: '/admin/blogs', label: 'Articles & News', icon: BookOpen },
     { href: '/admin/projects', label: 'Projects & Initiatives', icon: Briefcase },

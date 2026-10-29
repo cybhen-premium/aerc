@@ -11,6 +11,7 @@ import {
   initialActivityLogs,
   initialFocusAreas,
   initialMediaItems,
+  initialHomepageSettings,
 } from './seed-data';
 
 const connectionString = process.env.DATABASE_URL?.trim();
@@ -1132,7 +1133,7 @@ export async function getAllDonations(): Promise<schema.Donation[]> {
 // -------------------------------------------------------------
 
 export interface MediaUsage {
-  entityType: 'Article' | 'Project' | 'Publication' | 'Team Member' | 'Focus Area' | 'Page';
+  entityType: 'Article' | 'Project' | 'Publication' | 'Team Member' | 'Focus Area' | 'Page' | 'Homepage Settings';
   title: string;
   field: string;
   link?: string;
@@ -1408,6 +1409,41 @@ export async function checkMediaUsage(url: string, filename?: string): Promise<M
         });
       }
     }
+
+    // 7. Homepage Settings
+    const home = await getHomepageSettings();
+    if (matchesStr(home.heroBgImage)) {
+      usages.push({
+        entityType: 'Homepage Settings',
+        title: 'Homepage',
+        field: 'Hero Background Banner',
+        link: '/admin/homepage',
+      });
+    }
+    if (matchesStr(home.introImage)) {
+      usages.push({
+        entityType: 'Homepage Settings',
+        title: 'Homepage',
+        field: 'Introduction Image',
+        link: '/admin/homepage',
+      });
+    }
+    if (matchesStr(home.aboutImage)) {
+      usages.push({
+        entityType: 'Homepage Settings',
+        title: 'Homepage',
+        field: 'About / How We Work Image',
+        link: '/admin/homepage',
+      });
+    }
+    if (matchesStr(home.focusImage)) {
+      usages.push({
+        entityType: 'Homepage Settings',
+        title: 'Homepage',
+        field: 'Focus Areas Graphic',
+        link: '/admin/homepage',
+      });
+    }
   } catch (err) {
     console.error('Error during checkMediaUsage:', err);
   }
@@ -1417,6 +1453,55 @@ export async function checkMediaUsage(url: string, filename?: string): Promise<M
     totalUsages: usages.length,
     usages,
   };
+}
+
+/**
+ * Homepage Settings Query & Mutation Handlers
+ */
+export async function getHomepageSettings(): Promise<schema.HomepageSettings> {
+  if (!db) return initialHomepageSettings;
+  try {
+    const res = await db.select().from(schema.homepageSettings).where(eq(schema.homepageSettings.id, 1)).limit(1);
+    if (res.length > 0 && res[0]) {
+      return res[0];
+    }
+    return initialHomepageSettings;
+  } catch (error) {
+    console.warn('Database query failed for homepageSettings, using fallback:', error);
+    return initialHomepageSettings;
+  }
+}
+
+export async function updateHomepageSettings(
+  data: Partial<schema.NewHomepageSettings>
+): Promise<schema.HomepageSettings | null> {
+  if (!db) return null;
+  try {
+    const existing = await db.select().from(schema.homepageSettings).where(eq(schema.homepageSettings.id, 1)).limit(1);
+    if (existing.length === 0) {
+      const inserted = await db.insert(schema.homepageSettings).values({
+        ...initialHomepageSettings,
+        ...data,
+        id: 1,
+        updatedAt: new Date(),
+      }).returning();
+      return inserted[0] || null;
+    }
+
+    const updated = await db
+      .update(schema.homepageSettings)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.homepageSettings.id, 1))
+      .returning();
+
+    return updated[0] || null;
+  } catch (error) {
+    console.error('Failed to update homepage settings:', error);
+    throw error;
+  }
 }
 
 

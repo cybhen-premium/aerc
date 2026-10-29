@@ -348,6 +348,86 @@ export const mediaItems = pgTable('media_items', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// 15. Homepage Settings
+export const homepageSettings = pgTable('homepage_settings', {
+  id: serial('id').primaryKey(),
+  // Hero banner
+  heroHeadlinePrefix: text('hero_headline_prefix').default('Building Resilience Through ').notNull(),
+  heroHighlight: text('hero_highlight').default('Just Energy Transition').notNull(),
+  heroIntroduction: text('hero_introduction').default('Advancing a just, inclusive energy transition across rural Ghana—championing community ownership, decentralized solar mini-grids, and clean renewable power.').notNull(),
+  heroTag: varchar('hero_tag', { length: 100 }).default('AERC GHANA').notNull(),
+  heroBgImage: text('hero_bg_image').default('/images/slider-1.jpg').notNull(),
+  heroCtaPrimaryText: varchar('hero_cta_primary_text', { length: 100 }).default('Explore Initiatives').notNull(),
+  heroCtaPrimaryLink: varchar('hero_cta_primary_link', { length: 255 }).default('/projects').notNull(),
+  heroCtaSecondaryText: varchar('hero_cta_secondary_text', { length: 100 }).default('About Our Mission').notNull(),
+  heroCtaSecondaryLink: varchar('hero_cta_secondary_link', { length: 255 }).default('/about').notNull(),
+
+  // Introduction
+  introBadge: varchar('intro_badge', { length: 100 }).default('ABOUT AERC GHANA'),
+  introHeading: text('intro_heading').default('Grassroots Leadership Driving Climate Justice & Energy Sovereignty'),
+  introContent: text('intro_content').default('Alliance for Empowering Rural Communities (AERC Ghana) is a dedicated youth-led and community-centered environmental organisation advancing grassroots solutions to climate change, rural energy poverty, and natural resource governance across Ghana and West Africa.'),
+  introImage: text('intro_image').default('/images/about/who-we-are.jpg'),
+
+  // About / How We Work
+  aboutBadge: varchar('about_badge', { length: 100 }).default('HOW WE WORK'),
+  aboutHeading: text('about_heading').default('We Work Together For Bettering Tomorrow'),
+  aboutLead: text('about_lead').default('Through policy advocacy, research, and training, we bridge grassroots realities with national and global decision-making. We amplify community voices, strengthen local leadership, and connect our partners to the knowledge, resources, and networks that drive change. Every project we undertake reflects our belief that rural communities are not just beneficiaries, they are leaders in building a just, resilient, and sustainable future for all.'),
+  aboutImage: text('about_image').default('/images/bettering-tomorrow.jpg'),
+  aboutObjectivesJson: text('about_objectives_json'),
+
+  // Focus areas
+  focusBadge: varchar('focus_badge', { length: 100 }).default('STRATEGIC PILLARS'),
+  focusHeading: text('focus_heading').default('Our Focus Areas and Strategic Pillars'),
+  focusSubtitle: text('focus_subtitle').default('AERC focuses on Environment & Climate and Energy Transition, driving climate justice, community empowerment, and sustainable development.'),
+  focusImage: text('focus_image').default('/images/rrrr.png'),
+  featuredFocusAreaIds: text('featured_focus_area_ids'),
+
+  // Featured Projects
+  projectsBadge: varchar('projects_badge', { length: 100 }).default('ACTIVE INITIATIVES'),
+  projectsHeading: text('projects_heading').default('Our Featured Projects'),
+  projectsSubtitle: text('projects_subtitle').default('Community-led agroecology, clean cooking transitions, and renewable solar installations.'),
+  featuredProjectIds: text('featured_project_ids'),
+
+  // Impact statistics
+  impactStatsJson: text('impact_stats_json'),
+  displayImpactStats: varchar('display_impact_stats', { length: 10 }).default('yes'),
+
+  // News and articles
+  newsBadge: varchar('news_badge', { length: 100 }).default('LATEST DISPATCHES'),
+  newsHeading: text('news_heading').default('Latest News & Advocacy Stories'),
+  newsSubtitle: text('news_subtitle').default('Updates, grassroots insights, and policy announcements from AERC Ghana teams.'),
+  featuredArticleIds: text('featured_article_ids'),
+
+  // Publications
+  pubsBadge: varchar('pubs_badge', { length: 100 }).default('RESEARCH & POLICY'),
+  pubsHeading: text('pubs_heading').default('Publications & Downloadable Resources'),
+  pubsSubtitle: text('pubs_subtitle').default('Evidence-based policy briefs, investigative reports, and community toolkits.'),
+  featuredPublicationIds: text('featured_publication_ids'),
+
+  // Team
+  teamBadge: varchar('team_badge', { length: 100 }).default('OUR TEAM MEMBERS'),
+  teamHeading: text('team_heading').default('Our Awesome Team'),
+  teamSubtitle: text('team_subtitle').default('Meet the passionate practitioners, organizers, and policy advocates leading frontline change across Ghana.'),
+  featuredTeamIds: text('featured_team_ids'),
+
+  // Partners
+  partnersBadge: varchar('partners_badge', { length: 100 }).default('ALLIANCES & SUPPORTERS'),
+  partnersHeading: text('partners_heading').default('Our Coalitions & Strategic Partners'),
+  partnersJson: text('partners_json'),
+
+  // Call to action
+  ctaHeading: text('cta_heading').default('Join Hands With Us For Climate Justice'),
+  ctaSubtitle: text('cta_subtitle').default('Whether as a partner organisation, volunteer, or supporter, your engagement empowers rural communities to lead their own sustainable future.'),
+  ctaButtonText: varchar('cta_button_text', { length: 100 }).default('Get Involved Today'),
+  ctaButtonLink: varchar('cta_button_link', { length: 255 }).default('/partner'),
+
+  // Sections order and visibility
+  sectionsConfig: text('sections_config').notNull(),
+
+  updatedBy: varchar('updated_by', { length: 255 }).default('Admin'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // Type definitions
 export type BlogPost = Omit<
   typeof blogPosts.$inferSelect,
@@ -568,3 +648,91 @@ export type MediaItem = Omit<
   createdAt?: Date | null;
 };
 export type NewMediaItem = typeof mediaItems.$inferInsert;
+
+export type HomepageSettings = Omit<
+  typeof homepageSettings.$inferSelect,
+  | 'introBadge'
+  | 'introHeading'
+  | 'introContent'
+  | 'introImage'
+  | 'aboutBadge'
+  | 'aboutHeading'
+  | 'aboutLead'
+  | 'aboutImage'
+  | 'aboutObjectivesJson'
+  | 'focusBadge'
+  | 'focusHeading'
+  | 'focusSubtitle'
+  | 'focusImage'
+  | 'featuredFocusAreaIds'
+  | 'projectsBadge'
+  | 'projectsHeading'
+  | 'projectsSubtitle'
+  | 'featuredProjectIds'
+  | 'impactStatsJson'
+  | 'displayImpactStats'
+  | 'newsBadge'
+  | 'newsHeading'
+  | 'newsSubtitle'
+  | 'featuredArticleIds'
+  | 'pubsBadge'
+  | 'pubsHeading'
+  | 'pubsSubtitle'
+  | 'featuredPublicationIds'
+  | 'teamBadge'
+  | 'teamHeading'
+  | 'teamSubtitle'
+  | 'featuredTeamIds'
+  | 'partnersBadge'
+  | 'partnersHeading'
+  | 'partnersJson'
+  | 'ctaHeading'
+  | 'ctaSubtitle'
+  | 'ctaButtonText'
+  | 'ctaButtonLink'
+  | 'updatedBy'
+  | 'updatedAt'
+> & {
+  introBadge?: string | null;
+  introHeading?: string | null;
+  introContent?: string | null;
+  introImage?: string | null;
+  aboutBadge?: string | null;
+  aboutHeading?: string | null;
+  aboutLead?: string | null;
+  aboutImage?: string | null;
+  aboutObjectivesJson?: string | null;
+  focusBadge?: string | null;
+  focusHeading?: string | null;
+  focusSubtitle?: string | null;
+  focusImage?: string | null;
+  featuredFocusAreaIds?: string | null;
+  projectsBadge?: string | null;
+  projectsHeading?: string | null;
+  projectsSubtitle?: string | null;
+  featuredProjectIds?: string | null;
+  impactStatsJson?: string | null;
+  displayImpactStats?: string | null;
+  newsBadge?: string | null;
+  newsHeading?: string | null;
+  newsSubtitle?: string | null;
+  featuredArticleIds?: string | null;
+  pubsBadge?: string | null;
+  pubsHeading?: string | null;
+  pubsSubtitle?: string | null;
+  featuredPublicationIds?: string | null;
+  teamBadge?: string | null;
+  teamHeading?: string | null;
+  teamSubtitle?: string | null;
+  featuredTeamIds?: string | null;
+  partnersBadge?: string | null;
+  partnersHeading?: string | null;
+  partnersJson?: string | null;
+  ctaHeading?: string | null;
+  ctaSubtitle?: string | null;
+  ctaButtonText?: string | null;
+  ctaButtonLink?: string | null;
+  updatedBy?: string | null;
+  updatedAt?: Date | null;
+};
+export type NewHomepageSettings = typeof homepageSettings.$inferInsert;

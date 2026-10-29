@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import Link from 'next/link';
 
 const heroSlides = [
@@ -57,16 +57,47 @@ function MetricCounter({ target, suffix = '+' }: { target: number; suffix?: stri
   );
 }
 
-export default function HeroSlider() {
+interface HeroSliderProps {
+  customSlide?: {
+    tag?: string;
+    titlePrefix?: string;
+    highlight?: string;
+    description?: string;
+    bg?: string;
+    ctaPrimaryText?: string;
+    ctaPrimaryLink?: string;
+    ctaSecondaryText?: string;
+    ctaSecondaryLink?: string;
+  };
+  metrics?: {
+    label: string;
+    value: string;
+  }[];
+}
+
+export default function HeroSlider({ customSlide, metrics }: HeroSliderProps = {}) {
+  const activeSlides = useMemo(() => {
+    if (!customSlide) return heroSlides;
+    return [
+      {
+        tag: customSlide.tag || heroSlides[0].tag,
+        titlePrefix: customSlide.titlePrefix || heroSlides[0].titlePrefix,
+        highlight: customSlide.highlight || heroSlides[0].highlight,
+        description: customSlide.description || heroSlides[0].description,
+        bg: customSlide.bg || heroSlides[0].bg,
+      },
+      ...heroSlides.slice(1),
+    ];
+  }, [customSlide]);
   const [current, setCurrent] = useState(0);
 
   const nextSlide = useCallback(() => {
-    setCurrent((prev) => (prev + 1) % heroSlides.length);
-  }, []);
+    setCurrent((prev) => (prev + 1) % activeSlides.length);
+  }, [activeSlides.length]);
 
   const prevSlide = useCallback(() => {
-    setCurrent((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
-  }, []);
+    setCurrent((prev) => (prev - 1 + activeSlides.length) % activeSlides.length);
+  }, [activeSlides.length]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -75,12 +106,12 @@ export default function HeroSlider() {
     return () => clearInterval(timer);
   }, [nextSlide]);
 
-  const slide = heroSlides[current];
+  const slide = activeSlides[current] || activeSlides[0];
 
   return (
     <section className="hero-stage" id="home">
       {/* Background slide with smooth crossfade and subtle zoom */}
-      {heroSlides.map((s, idx) => (
+      {activeSlides.map((s, idx) => (
         <div
           key={idx}
           className={`hero-bg-backdrop ${idx === current ? 'hero-bg-active' : ''}`}
@@ -117,39 +148,60 @@ export default function HeroSlider() {
           </div>
 
           <div className="hero-actions">
-            <Link href="/projects" className="btn-primary hero-btn-main">
-              <span>Explore Initiatives</span>
+            <Link
+              href={customSlide?.ctaPrimaryLink || '/projects'}
+              className="btn-primary hero-btn-main"
+            >
+              <span>{customSlide?.ctaPrimaryText || 'Explore Initiatives'}</span>
               <i className="fa-solid fa-arrow-right"></i>
             </Link>
-            <Link href="/about" className="btn-ghost-white">
-              <span>About Our Mission</span>
+            <Link
+              href={customSlide?.ctaSecondaryLink || '/about'}
+              className="btn-ghost-white"
+            >
+              <span>{customSlide?.ctaSecondaryText || 'About Our Mission'}</span>
               <i className="fa-solid fa-angles-right"></i>
             </Link>
           </div>
 
           {/* Impact Metrics Bento Bar with live count-up animation */}
           <div className="hero-metrics-bar">
-            <div className="metric-stat-item">
-              <MetricCounter target={10} suffix="+" />
-              <span className="metric-lbl">Years Grassroots Impact</span>
-            </div>
-            <div className="metric-stat-item">
-              <MetricCounter target={150} suffix="+" />
-              <span className="metric-lbl">Women Farmers Supported</span>
-            </div>
-            <div className="metric-stat-item">
-              <MetricCounter target={12} suffix="+" />
-              <span className="metric-lbl">Schools in Green Network</span>
-            </div>
-            <div className="metric-stat-item">
-              <MetricCounter target={7} suffix="+" />
-              <span className="metric-lbl">Frontline Campaigns</span>
-            </div>
+            {metrics && metrics.length > 0 ? (
+              metrics.slice(0, 4).map((m, idx) => {
+                const numVal = parseInt(m.value.replace(/[^0-9]/g, ''), 10) || 10;
+                const suffix = m.value.replace(/[0-9]/g, '') || '+';
+                return (
+                  <div key={idx} className="metric-stat-item">
+                    <MetricCounter target={numVal} suffix={suffix} />
+                    <span className="metric-lbl">{m.label}</span>
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                <div className="metric-stat-item">
+                  <MetricCounter target={10} suffix="+" />
+                  <span className="metric-lbl">Years Grassroots Impact</span>
+                </div>
+                <div className="metric-stat-item">
+                  <MetricCounter target={150} suffix="+" />
+                  <span className="metric-lbl">Women Farmers Supported</span>
+                </div>
+                <div className="metric-stat-item">
+                  <MetricCounter target={12} suffix="+" />
+                  <span className="metric-lbl">Schools in Green Network</span>
+                </div>
+                <div className="metric-stat-item">
+                  <MetricCounter target={7} suffix="+" />
+                  <span className="metric-lbl">Frontline Campaigns</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Slide Indicator Dots */}
           <div className="hero-dots-indicator">
-            {heroSlides.map((_, idx) => (
+            {activeSlides.map((_, idx) => (
               <button
                 key={idx}
                 type="button"

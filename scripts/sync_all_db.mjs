@@ -227,6 +227,64 @@ async function main() {
   `;
   await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_media_items_url ON media_items (url);`;
 
+  // 4j. Homepage Settings
+  await sql`
+    CREATE TABLE IF NOT EXISTS homepage_settings (
+      id SERIAL PRIMARY KEY,
+      hero_headline_prefix TEXT DEFAULT 'Building Resilience Through ' NOT NULL,
+      hero_highlight TEXT DEFAULT 'Just Energy Transition' NOT NULL,
+      hero_introduction TEXT DEFAULT 'Advancing a just, inclusive energy transition across rural Ghana—championing community ownership, decentralized solar mini-grids, and clean renewable power.' NOT NULL,
+      hero_tag VARCHAR(100) DEFAULT 'AERC GHANA' NOT NULL,
+      hero_bg_image TEXT DEFAULT '/images/slider-1.jpg' NOT NULL,
+      hero_cta_primary_text VARCHAR(100) DEFAULT 'Explore Initiatives' NOT NULL,
+      hero_cta_primary_link VARCHAR(255) DEFAULT '/projects' NOT NULL,
+      hero_cta_secondary_text VARCHAR(100) DEFAULT 'About Our Mission' NOT NULL,
+      hero_cta_secondary_link VARCHAR(255) DEFAULT '/about' NOT NULL,
+      intro_badge VARCHAR(100) DEFAULT 'ABOUT AERC GHANA',
+      intro_heading TEXT DEFAULT 'Grassroots Leadership Driving Climate Justice & Energy Sovereignty',
+      intro_content TEXT DEFAULT 'Alliance for Empowering Rural Communities (AERC Ghana) is a dedicated youth-led and community-centered environmental organisation advancing grassroots solutions to climate change, rural energy poverty, and natural resource governance across Ghana and West Africa.',
+      intro_image TEXT DEFAULT '/images/about/who-we-are.jpg',
+      about_badge VARCHAR(100) DEFAULT 'HOW WE WORK',
+      about_heading TEXT DEFAULT 'We Work Together For Bettering Tomorrow',
+      about_lead TEXT DEFAULT 'Through policy advocacy, research, and training, we bridge grassroots realities with national and global decision-making. We amplify community voices, strengthen local leadership, and connect our partners to the knowledge, resources, and networks that drive change. Every project we undertake reflects our belief that rural communities are not just beneficiaries, they are leaders in building a just, resilient, and sustainable future for all.',
+      about_image TEXT DEFAULT '/images/bettering-tomorrow.jpg',
+      about_objectives_json TEXT,
+      focus_badge VARCHAR(100) DEFAULT 'STRATEGIC PILLARS',
+      focus_heading TEXT DEFAULT 'Our Focus Areas and Strategic Pillars',
+      focus_subtitle TEXT DEFAULT 'AERC focuses on Environment & Climate and Energy Transition, driving climate justice, community empowerment, and sustainable development.',
+      focus_image TEXT DEFAULT '/images/rrrr.png',
+      featured_focus_area_ids TEXT,
+      projects_badge VARCHAR(100) DEFAULT 'ACTIVE INITIATIVES',
+      projects_heading TEXT DEFAULT 'Our Featured Projects',
+      projects_subtitle TEXT DEFAULT 'Community-led agroecology, clean cooking transitions, and renewable solar installations.',
+      featured_project_ids TEXT,
+      impact_stats_json TEXT,
+      display_impact_stats VARCHAR(10) DEFAULT 'yes',
+      news_badge VARCHAR(100) DEFAULT 'LATEST DISPATCHES',
+      news_heading TEXT DEFAULT 'Latest News & Advocacy Stories',
+      news_subtitle TEXT DEFAULT 'Updates, grassroots insights, and policy announcements from AERC Ghana teams.',
+      featured_article_ids TEXT,
+      pubs_badge VARCHAR(100) DEFAULT 'RESEARCH & POLICY',
+      pubs_heading TEXT DEFAULT 'Publications & Downloadable Resources',
+      pubs_subtitle TEXT DEFAULT 'Evidence-based policy briefs, investigative reports, and community toolkits.',
+      featured_publication_ids TEXT,
+      team_badge VARCHAR(100) DEFAULT 'OUR TEAM MEMBERS',
+      team_heading TEXT DEFAULT 'Our Awesome Team',
+      team_subtitle TEXT DEFAULT 'Meet the passionate practitioners, organizers, and policy advocates leading frontline change across Ghana.',
+      featured_team_ids TEXT,
+      partners_badge VARCHAR(100) DEFAULT 'ALLIANCES & SUPPORTERS',
+      partners_heading TEXT DEFAULT 'Our Coalitions & Strategic Partners',
+      partners_json TEXT,
+      cta_heading TEXT DEFAULT 'Join Hands With Us For Climate Justice',
+      cta_subtitle TEXT DEFAULT 'Whether as a partner organisation, volunteer, or supporter, your engagement empowers rural communities to lead their own sustainable future.',
+      cta_button_text VARCHAR(100) DEFAULT 'Get Involved Today',
+      cta_button_link VARCHAR(255) DEFAULT '/partner',
+      sections_config TEXT NOT NULL,
+      updated_by VARCHAR(255) DEFAULT 'Admin',
+      updated_at TIMESTAMP DEFAULT NOW() NOT NULL
+    );
+  `;
+
   // 5. Add columns if not exist
   await sql`ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'published';`;
   await sql`ALTER TABLE blog_posts ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`;
@@ -299,7 +357,7 @@ async function main() {
 
   console.log('✅ Tables and schema columns verified.');
 
-  const { initialProjects, initialBlogs, initialTeamMembers, initialSitePages, initialActivityLogs, initialFocusAreas, initialPublications, initialMediaItems } = await import('../src/db/seed-data.ts');
+  const { initialProjects, initialBlogs, initialTeamMembers, initialSitePages, initialActivityLogs, initialFocusAreas, initialPublications, initialMediaItems, initialHomepageSettings } = await import('../src/db/seed-data.ts');
 
   console.log('Syncing all 11 publications...');
   for (const pub of initialPublications) {
@@ -456,6 +514,46 @@ async function main() {
     console.log(`✅ Synced ${initialMediaItems.length} media library items.`);
   }
 
+  console.log('Checking homepage settings...');
+  const existingHomepage = await sql`SELECT count(*) FROM homepage_settings;`;
+  if (Number(existingHomepage[0].count) === 0) {
+    console.log('Seeding initial homepage settings...');
+    const hs = initialHomepageSettings;
+    await sql`
+      INSERT INTO homepage_settings (
+        id, hero_headline_prefix, hero_highlight, hero_introduction, hero_tag, hero_bg_image,
+        hero_cta_primary_text, hero_cta_primary_link, hero_cta_secondary_text, hero_cta_secondary_link,
+        intro_badge, intro_heading, intro_content, intro_image,
+        about_badge, about_heading, about_lead, about_image, about_objectives_json,
+        focus_badge, focus_heading, focus_subtitle, focus_image, featured_focus_area_ids,
+        projects_badge, projects_heading, projects_subtitle, featured_project_ids,
+        impact_stats_json, display_impact_stats,
+        news_badge, news_heading, news_subtitle, featured_article_ids,
+        pubs_badge, pubs_heading, pubs_subtitle, featured_publication_ids,
+        team_badge, team_heading, team_subtitle, featured_team_ids,
+        partners_badge, partners_heading, partners_json,
+        cta_heading, cta_subtitle, cta_button_text, cta_button_link,
+        sections_config, updated_by
+      )
+      VALUES (
+        1, ${hs.heroHeadlinePrefix}, ${hs.heroHighlight}, ${hs.heroIntroduction}, ${hs.heroTag}, ${hs.heroBgImage},
+        ${hs.heroCtaPrimaryText}, ${hs.heroCtaPrimaryLink}, ${hs.heroCtaSecondaryText}, ${hs.heroCtaSecondaryLink},
+        ${hs.introBadge}, ${hs.introHeading}, ${hs.introContent}, ${hs.introImage},
+        ${hs.aboutBadge}, ${hs.aboutHeading}, ${hs.aboutLead}, ${hs.aboutImage}, ${hs.aboutObjectivesJson},
+        ${hs.focusBadge}, ${hs.focusHeading}, ${hs.focusSubtitle}, ${hs.focusImage}, ${hs.featuredFocusAreaIds},
+        ${hs.projectsBadge}, ${hs.projectsHeading}, ${hs.projectsSubtitle}, ${hs.featuredProjectIds},
+        ${hs.impactStatsJson}, ${hs.displayImpactStats},
+        ${hs.newsBadge}, ${hs.newsHeading}, ${hs.newsSubtitle}, ${hs.featuredArticleIds},
+        ${hs.pubsBadge}, ${hs.pubsHeading}, ${hs.pubsSubtitle}, ${hs.featuredPublicationIds},
+        ${hs.teamBadge}, ${hs.teamHeading}, ${hs.teamSubtitle}, ${hs.featuredTeamIds},
+        ${hs.partnersBadge}, ${hs.partnersHeading}, ${hs.partnersJson},
+        ${hs.ctaHeading}, ${hs.ctaSubtitle}, ${hs.ctaButtonText}, ${hs.ctaButtonLink},
+        ${hs.sectionsConfig}, 'Admin'
+      );
+    `;
+    console.log('✅ Seeded default homepage settings.');
+  }
+
   console.log('Checking activity logs...');
   const existingLogs = await sql`SELECT count(*) FROM activity_logs;`;
   if (Number(existingLogs[0].count) === 0) {
@@ -475,6 +573,18 @@ async function main() {
       INSERT INTO donations (donor_name, donor_email, amount, currency, frequency, campaign, payment_method, status, message)
       VALUES ('Kwame Mensah', 'kwame.mensah@gmail.com', '50', 'USD', 'monthly', 'Green-Life School Clubs', 'mobile_money', 'completed', 'Keep empowering our youth in Accra and rural Ghana!');
     `;
+  }
+
+  const existingAdmins = await sql`SELECT count(*) FROM admins;`;
+  if (Number(existingAdmins[0].count) === 0) {
+    console.log('Seeding initial administrator account...');
+    const bcrypt = (await import('bcryptjs')).default;
+    const passwordHash = await bcrypt.hash('AdminPassword2026!', 12);
+    await sql`
+      INSERT INTO admins (name, email, password_hash, role)
+      VALUES ('AERC Administrator', 'admin@aercghana.org', ${passwordHash}, 'superadmin');
+    `;
+    console.log('✅ Seeded default admin account (admin@aercghana.org / AdminPassword2026!)');
   }
 
   console.log('🎉 Complete database synchronization successful!');

@@ -108,6 +108,8 @@ import {
   updateMediaItem,
   deleteMediaItem,
   checkMediaUsage,
+  getHomepageSettings,
+  updateHomepageSettings,
 } from '@/db';
 import { requireAdmin } from '@/lib/auth';
 import { uploadFileToStorage, deleteMediaFile } from '@/lib/cloudinary';
@@ -1921,6 +1923,224 @@ export async function checkMediaUsageAction(id: number) {
     return { isUsed: false, totalUsages: 0, usages: [] };
   }
   return await checkMediaUsage(existing.url, existing.filename);
+}
+
+/**
+ * -----------------------------------------------------------------------------
+ * 9. Homepage Manager Server Actions
+ * -----------------------------------------------------------------------------
+ */
+
+export async function updateHomepageSectionsAction(
+  sectionsConfigJson: string
+): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    // Validate JSON
+    const parsed = JSON.parse(sectionsConfigJson);
+    if (!Array.isArray(parsed)) {
+      return { success: false, error: 'Invalid section configuration format.' };
+    }
+
+    await updateHomepageSettings({
+      sectionsConfig: JSON.stringify(parsed),
+      updatedBy: session.name,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'settings',
+      'Homepage Sections Order & Visibility',
+      `Updated homepage layout configuration (${parsed.length} sections)`
+    );
+
+    revalidatePath('/');
+    revalidatePath('/admin/homepage');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update homepage sections:', error);
+    return { success: false, error: 'Failed to update section arrangement.' };
+  }
+}
+
+export async function updateHomepageImpactStatsAction(
+  impactStatsJson: string,
+  displayImpactStats: string
+): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    const parsed = JSON.parse(impactStatsJson);
+    if (!Array.isArray(parsed)) {
+      return { success: false, error: 'Invalid impact statistics format.' };
+    }
+
+    await updateHomepageSettings({
+      impactStatsJson: JSON.stringify(parsed),
+      displayImpactStats: displayImpactStats === 'yes' ? 'yes' : 'no',
+      updatedBy: session.name,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'settings',
+      'Homepage Verified Impact Statistics',
+      `Updated verified metrics (Display: ${displayImpactStats})`
+    );
+
+    revalidatePath('/');
+    revalidatePath('/admin/homepage');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update impact statistics:', error);
+    return { success: false, error: 'Failed to update impact statistics.' };
+  }
+}
+
+export async function updateHomepageContentAction(
+  formData: FormData
+): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    // Collect fields
+    const heroHeadlinePrefix = (formData.get('heroHeadlinePrefix') as string)?.trim();
+    const heroHighlight = (formData.get('heroHighlight') as string)?.trim();
+    const heroIntroduction = (formData.get('heroIntroduction') as string)?.trim();
+    const heroTag = (formData.get('heroTag') as string)?.trim();
+    const heroBgImage = (formData.get('heroBgImage') as string)?.trim();
+    const heroCtaPrimaryText = (formData.get('heroCtaPrimaryText') as string)?.trim();
+    const heroCtaPrimaryLink = (formData.get('heroCtaPrimaryLink') as string)?.trim();
+    const heroCtaSecondaryText = (formData.get('heroCtaSecondaryText') as string)?.trim();
+    const heroCtaSecondaryLink = (formData.get('heroCtaSecondaryLink') as string)?.trim();
+
+    const introBadge = (formData.get('introBadge') as string)?.trim();
+    const introHeading = (formData.get('introHeading') as string)?.trim();
+    const introContent = (formData.get('introContent') as string)?.trim();
+    const introImage = (formData.get('introImage') as string)?.trim();
+
+    const aboutBadge = (formData.get('aboutBadge') as string)?.trim();
+    const aboutHeading = (formData.get('aboutHeading') as string)?.trim();
+    const aboutLead = (formData.get('aboutLead') as string)?.trim();
+    const aboutImage = (formData.get('aboutImage') as string)?.trim();
+    const aboutObjectivesJson = (formData.get('aboutObjectivesJson') as string)?.trim();
+
+    const focusBadge = (formData.get('focusBadge') as string)?.trim();
+    const focusHeading = (formData.get('focusHeading') as string)?.trim();
+    const focusSubtitle = (formData.get('focusSubtitle') as string)?.trim();
+    const focusImage = (formData.get('focusImage') as string)?.trim();
+    const featuredFocusAreaIds = (formData.get('featuredFocusAreaIds') as string)?.trim();
+
+    const projectsBadge = (formData.get('projectsBadge') as string)?.trim();
+    const projectsHeading = (formData.get('projectsHeading') as string)?.trim();
+    const projectsSubtitle = (formData.get('projectsSubtitle') as string)?.trim();
+    const featuredProjectIds = (formData.get('featuredProjectIds') as string)?.trim();
+
+    const newsBadge = (formData.get('newsBadge') as string)?.trim();
+    const newsHeading = (formData.get('newsHeading') as string)?.trim();
+    const newsSubtitle = (formData.get('newsSubtitle') as string)?.trim();
+    const featuredArticleIds = (formData.get('featuredArticleIds') as string)?.trim();
+
+    const pubsBadge = (formData.get('pubsBadge') as string)?.trim();
+    const pubsHeading = (formData.get('pubsHeading') as string)?.trim();
+    const pubsSubtitle = (formData.get('pubsSubtitle') as string)?.trim();
+    const featuredPublicationIds = (formData.get('featuredPublicationIds') as string)?.trim();
+
+    const teamBadge = (formData.get('teamBadge') as string)?.trim();
+    const teamHeading = (formData.get('teamHeading') as string)?.trim();
+    const teamSubtitle = (formData.get('teamSubtitle') as string)?.trim();
+    const featuredTeamIds = (formData.get('featuredTeamIds') as string)?.trim();
+
+    const partnersBadge = (formData.get('partnersBadge') as string)?.trim();
+    const partnersHeading = (formData.get('partnersHeading') as string)?.trim();
+    const partnersJson = (formData.get('partnersJson') as string)?.trim();
+
+    const ctaHeading = (formData.get('ctaHeading') as string)?.trim();
+    const ctaSubtitle = (formData.get('ctaSubtitle') as string)?.trim();
+    const ctaButtonText = (formData.get('ctaButtonText') as string)?.trim();
+    const ctaButtonLink = (formData.get('ctaButtonLink') as string)?.trim();
+
+    await updateHomepageSettings({
+      ...(heroHeadlinePrefix !== undefined && { heroHeadlinePrefix }),
+      ...(heroHighlight !== undefined && { heroHighlight }),
+      ...(heroIntroduction !== undefined && { heroIntroduction }),
+      ...(heroTag !== undefined && { heroTag }),
+      ...(heroBgImage !== undefined && { heroBgImage }),
+      ...(heroCtaPrimaryText !== undefined && { heroCtaPrimaryText }),
+      ...(heroCtaPrimaryLink !== undefined && { heroCtaPrimaryLink }),
+      ...(heroCtaSecondaryText !== undefined && { heroCtaSecondaryText }),
+      ...(heroCtaSecondaryLink !== undefined && { heroCtaSecondaryLink }),
+
+      ...(introBadge !== undefined && { introBadge }),
+      ...(introHeading !== undefined && { introHeading }),
+      ...(introContent !== undefined && { introContent }),
+      ...(introImage !== undefined && { introImage }),
+
+      ...(aboutBadge !== undefined && { aboutBadge }),
+      ...(aboutHeading !== undefined && { aboutHeading }),
+      ...(aboutLead !== undefined && { aboutLead }),
+      ...(aboutImage !== undefined && { aboutImage }),
+      ...(aboutObjectivesJson !== undefined && { aboutObjectivesJson }),
+
+      ...(focusBadge !== undefined && { focusBadge }),
+      ...(focusHeading !== undefined && { focusHeading }),
+      ...(focusSubtitle !== undefined && { focusSubtitle }),
+      ...(focusImage !== undefined && { focusImage }),
+      ...(featuredFocusAreaIds !== undefined && { featuredFocusAreaIds }),
+
+      ...(projectsBadge !== undefined && { projectsBadge }),
+      ...(projectsHeading !== undefined && { projectsHeading }),
+      ...(projectsSubtitle !== undefined && { projectsSubtitle }),
+      ...(featuredProjectIds !== undefined && { featuredProjectIds }),
+
+      ...(newsBadge !== undefined && { newsBadge }),
+      ...(newsHeading !== undefined && { newsHeading }),
+      ...(newsSubtitle !== undefined && { newsSubtitle }),
+      ...(featuredArticleIds !== undefined && { featuredArticleIds }),
+
+      ...(pubsBadge !== undefined && { pubsBadge }),
+      ...(pubsHeading !== undefined && { pubsHeading }),
+      ...(pubsSubtitle !== undefined && { pubsSubtitle }),
+      ...(featuredPublicationIds !== undefined && { featuredPublicationIds }),
+
+      ...(teamBadge !== undefined && { teamBadge }),
+      ...(teamHeading !== undefined && { teamHeading }),
+      ...(teamSubtitle !== undefined && { teamSubtitle }),
+      ...(featuredTeamIds !== undefined && { featuredTeamIds }),
+
+      ...(partnersBadge !== undefined && { partnersBadge }),
+      ...(partnersHeading !== undefined && { partnersHeading }),
+      ...(partnersJson !== undefined && { partnersJson }),
+
+      ...(ctaHeading !== undefined && { ctaHeading }),
+      ...(ctaSubtitle !== undefined && { ctaSubtitle }),
+      ...(ctaButtonText !== undefined && { ctaButtonText }),
+      ...(ctaButtonLink !== undefined && { ctaButtonLink }),
+
+      updatedBy: session.name,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'settings',
+      'Homepage Content Configuration',
+      'Updated homepage headlines, copy, imagery, and featured selections'
+    );
+
+    revalidatePath('/');
+    revalidatePath('/admin/homepage');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update homepage content:', error);
+    return { success: false, error: 'Failed to save homepage modifications.' };
+  }
 }
 
 

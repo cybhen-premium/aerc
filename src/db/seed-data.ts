@@ -1,4 +1,4 @@
-import { BlogPost, Publication, Project, FocusArea, MediaItem } from './schema';
+import { BlogPost, Publication, Project, FocusArea, MediaItem, HomepageSettings } from './schema';
 
 export const initialProjects: Project[] = [
   {
@@ -1828,5 +1828,170 @@ export const initialMediaItems: MediaItem[] = [
     uploadedBy: 'System Migration',
   },
 ];
+
+export interface HomepageSectionConfig {
+  id: string;
+  name: string;
+  description: string;
+  isEnabled: boolean;
+  order: number;
+}
+
+export interface ImpactStatItem {
+  id: string;
+  label: string;
+  value: string;
+  description: string;
+  verified: boolean;
+  sourceOrNote: string;
+  show: boolean;
+}
+
+export interface PartnerItem {
+  id: string;
+  name: string;
+  logo: string;
+  url?: string;
+  category: string;
+}
+
+export interface ObjectiveItem {
+  num: string;
+  title: string;
+  description?: string;
+}
+
+export const defaultHomepageSections: HomepageSectionConfig[] = [
+  { id: 'hero', name: 'Hero Banner', description: 'Cinematic headline, introduction, and dynamic calls-to-action', isEnabled: true, order: 1 },
+  { id: 'intro', name: 'Introduction to AERC Ghana', description: 'Grassroots leadership narrative with who-we-are visual', isEnabled: true, order: 2 },
+  { id: 'focus', name: 'Focus Areas & Strategic Pillars', description: 'Environment & Climate, Energy Transition pillars with interactive accordion', isEnabled: true, order: 3 },
+  { id: 'about', name: 'About & Strategic Objectives', description: 'How We Work 4-objective framework with authentic frontline photo', isEnabled: true, order: 4 },
+  { id: 'projects', name: 'Featured Projects', description: 'Showcase of selected grassroots initiatives and community pilots', isEnabled: true, order: 5 },
+  { id: 'impact', name: 'Verified Impact Statistics', description: 'Communities reached, projects implemented, people engaged, publications produced', isEnabled: true, order: 6 },
+  { id: 'news', name: 'Latest News & Articles', description: 'Selected or recent dispatches, advocacy updates, and field reports', isEnabled: true, order: 7 },
+  { id: 'publications', name: 'Publications & Resources', description: 'Policy briefs, annual reports, toolkits, and research library downloads', isEnabled: true, order: 8 },
+  { id: 'team', name: 'Team Highlights', description: 'Leadership, officers, and community coordinators driving change', isEnabled: true, order: 9 },
+  { id: 'partners', name: 'Partners & Supporters', description: 'Civil society alliances, grassroots supporters, and strategic networks', isEnabled: true, order: 10 },
+  { id: 'cta', name: 'Call to Action', description: 'Engagement prompt inviting partners, volunteers, and supporters', isEnabled: true, order: 11 },
+];
+
+export const defaultImpactStats: ImpactStatItem[] = [
+  {
+    id: 'communities',
+    label: 'Communities Reached',
+    value: '45+',
+    description: 'Rural and frontline peri-urban communities across Volta, Eastern, Northern, and Greater Accra regions',
+    verified: true,
+    sourceOrNote: 'Verified via 2024-2025 community liaison records & stakeholder attendance logs',
+    show: true,
+  },
+  {
+    id: 'projects',
+    label: 'Projects Implemented',
+    value: '12',
+    description: 'Community-led agroecology, clean cooking transitions, and renewable solar installations',
+    verified: true,
+    sourceOrNote: 'Documented project reports & donor evaluations (Kuvuna, JET, Clean Cooking, etc.)',
+    show: true,
+  },
+  {
+    id: 'people',
+    label: 'People Engaged',
+    value: '25,000+',
+    description: 'Smallholder women farmers, youth leaders, local assembly representatives, and civic organizers',
+    verified: true,
+    sourceOrNote: 'Cumulative event registrations, training workshops, and community town hall records',
+    show: true,
+  },
+  {
+    id: 'publications',
+    label: 'Publications Produced',
+    value: '11',
+    description: 'Peer-reviewed research briefs, grassroots policy submissions, and community advocacy toolkits',
+    verified: true,
+    sourceOrNote: 'Official AERC repository catalog with ISBN/online distribution records',
+    show: true,
+  },
+];
+
+export const defaultAboutObjectives: ObjectiveItem[] = [
+  { num: '01', title: 'Advance a Just and Inclusive Energy Transition', description: 'Promoting community-owned clean power and equitable phase-out of fossil financing.' },
+  { num: '02', title: 'Strengthen Community-Led Climate and Environmental Resilience', description: 'Deploying nature-based solutions and indigenous agroecological knowledge.' },
+  { num: '03', title: 'Empower and Engage Communities in Decision-Making', description: 'Elevating youth, women, and marginalized rural groups in national policy dialogues.' },
+  { num: '04', title: 'Foster Local Ownership for Sustainable Development', description: 'Ensuring lasting self-sufficiency and local stewardship of environmental assets.' },
+];
+
+export const defaultPartners: PartnerItem[] = [
+  { id: '1', name: 'Global Energy Transition Alliance', logo: '/images/partner-1.png', category: 'Coalition' },
+  { id: '2', name: 'African Climate Justice Youth Network', logo: '/images/partner-2.png', category: 'Civil Society' },
+  { id: '3', name: 'Ghana Renewable Energy Action Forum', logo: '/images/partner-3.png', category: 'National Partner' },
+  { id: '4', name: 'Eco-Agroecology International', logo: '/images/partner-4.png', category: 'Research Partner' },
+];
+
+export const initialHomepageSettings: HomepageSettings = {
+  id: 1,
+  heroHeadlinePrefix: 'Building Resilience Through ',
+  heroHighlight: 'Just Energy Transition',
+  heroIntroduction: 'Advancing a just, inclusive energy transition across rural Ghana—championing community ownership, decentralized solar mini-grids, and clean renewable power.',
+  heroTag: 'AERC GHANA',
+  heroBgImage: '/images/slider-1.jpg',
+  heroCtaPrimaryText: 'Explore Initiatives',
+  heroCtaPrimaryLink: '/projects',
+  heroCtaSecondaryText: 'About Our Mission',
+  heroCtaSecondaryLink: '/about',
+
+  introBadge: 'ABOUT AERC GHANA',
+  introHeading: 'Grassroots Leadership Driving Climate Justice & Energy Sovereignty',
+  introContent: 'Alliance for Empowering Rural Communities (AERC Ghana) is a dedicated youth-led and community-centered environmental organisation advancing grassroots solutions to climate change, rural energy poverty, and natural resource governance across Ghana and West Africa.',
+  introImage: '/images/about/who-we-are.jpg',
+
+  aboutBadge: 'HOW WE WORK',
+  aboutHeading: 'We Work Together For Bettering Tomorrow',
+  aboutLead: 'Through policy advocacy, research, and training, we bridge grassroots realities with national and global decision-making. We amplify community voices, strengthen local leadership, and connect our partners to the knowledge, resources, and networks that drive change. Every project we undertake reflects our belief that rural communities are not just beneficiaries, they are leaders in building a just, resilient, and sustainable future for all.',
+  aboutImage: '/images/bettering-tomorrow.jpg',
+  aboutObjectivesJson: JSON.stringify(defaultAboutObjectives),
+
+  focusBadge: 'STRATEGIC PILLARS',
+  focusHeading: 'Our Focus Areas and Strategic Pillars',
+  focusSubtitle: 'AERC focuses on Environment & Climate and Energy Transition, driving climate justice, community empowerment, and sustainable development.',
+  focusImage: '/images/rrrr.png',
+  featuredFocusAreaIds: JSON.stringify([1, 2, 3, 4, 5, 6, 7]),
+
+  projectsBadge: 'ACTIVE INITIATIVES',
+  projectsHeading: 'Our Featured Projects',
+  projectsSubtitle: 'Community-led agroecology, clean cooking transitions, and renewable solar installations.',
+  featuredProjectIds: JSON.stringify([1, 2, 3, 4]),
+
+  impactStatsJson: JSON.stringify(defaultImpactStats),
+  displayImpactStats: 'yes',
+
+  newsBadge: 'LATEST DISPATCHES',
+  newsHeading: 'Latest News & Advocacy Stories',
+  newsSubtitle: 'Updates, grassroots insights, and policy announcements from AERC Ghana teams.',
+  featuredArticleIds: JSON.stringify([1, 2, 3]),
+
+  pubsBadge: 'RESEARCH & POLICY',
+  pubsHeading: 'Publications & Downloadable Resources',
+  pubsSubtitle: 'Evidence-based policy briefs, investigative reports, and community toolkits.',
+  featuredPublicationIds: JSON.stringify([1, 2, 3, 4]),
+
+  teamBadge: 'OUR TEAM MEMBERS',
+  teamHeading: 'Our Awesome Team',
+  teamSubtitle: 'Meet the passionate practitioners, organizers, and policy advocates leading frontline change across Ghana.',
+  featuredTeamIds: JSON.stringify([1, 2, 3, 4, 5, 6]),
+
+  partnersBadge: 'ALLIANCES & SUPPORTERS',
+  partnersHeading: 'Our Coalitions & Strategic Partners',
+  partnersJson: JSON.stringify(defaultPartners),
+
+  ctaHeading: 'Join Hands With Us For Climate Justice',
+  ctaSubtitle: 'Whether as a partner organisation, volunteer, or supporter, your engagement empowers rural communities to lead their own sustainable future.',
+  ctaButtonText: 'Get Involved Today',
+  ctaButtonLink: '/partner',
+
+  sectionsConfig: JSON.stringify(defaultHomepageSections),
+  updatedBy: 'Admin',
+  updatedAt: new Date(),
+};
 
 

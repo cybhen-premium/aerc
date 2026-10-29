@@ -9,13 +9,40 @@ export type ActionResponse = {
 };
 
 export async function submitContactForm(formData: FormData): Promise<ActionResponse> {
-  const name = formData.get('name') as string;
-  const email = formData.get('email') as string;
-  const subject = formData.get('subject') as string;
-  const message = formData.get('message') as string;
+  // Anti-spam Honeypot Check
+  const honeypot = formData.get('website_url_hp') as string;
+  if (honeypot && honeypot.trim().length > 0) {
+    // Silently swallow bot submission
+    return { success: true, message: 'Thank you! Your message has been sent successfully.' };
+  }
 
-  if (!name || !email || !message) {
-    return { success: false, message: 'Please fill in all required fields.' };
+  // Quick submission bot check
+  const renderTimeStr = formData.get('_submission_ts') as string;
+  if (renderTimeStr) {
+    const elapsed = Date.now() - Number(renderTimeStr);
+    if (elapsed < 1200) {
+      return { success: false, message: 'Submission detected as automated. Please try again.' };
+    }
+  }
+
+  const name = (formData.get('name') as string)?.trim();
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
+  const phone = (formData.get('phone') as string)?.trim() || null;
+  const category = (formData.get('category') as string)?.trim() || (formData.get('subject') as string)?.trim() || 'General Inquiry';
+  const subject = (formData.get('subject') as string)?.trim() || category || 'General Inquiry';
+  const message = (formData.get('message') as string)?.trim();
+
+  if (!name || name.length < 2) {
+    return { success: false, message: 'Please provide your full name.' };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || !emailRegex.test(email)) {
+    return { success: false, message: 'Please provide a valid email address.' };
+  }
+
+  if (!message || message.length < 10) {
+    return { success: false, message: 'Please provide a message of at least 10 characters.' };
   }
 
   try {
@@ -23,16 +50,21 @@ export async function submitContactForm(formData: FormData): Promise<ActionRespo
       await db.insert(schema.contactInquiries).values({
         name,
         email,
-        subject: subject || 'General Inquiry',
+        phone,
+        category,
+        subject,
         message,
+        status: 'New',
+        isRead: false,
+        priority: 'normal',
       });
     } else {
-      console.log('Recorded contact inquiry (mock fallback):', { name, email, subject, message });
+      console.log('Recorded contact inquiry (mock fallback):', { name, email, phone, category, subject, message });
     }
-    return { success: true, message: 'Thank you! Your message has been sent successfully.' };
+    return { success: true, message: 'Thank you! Your inquiry has been received and routed to our team.' };
   } catch (error) {
     console.error('Failed to submit contact form:', error);
-    return { success: true, message: 'Thank you! Your message has been noted.' };
+    return { success: false, message: 'Failed to submit inquiry. Please try again shortly.' };
   }
 }
 

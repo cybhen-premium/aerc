@@ -331,7 +331,46 @@ async function main() {
   await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`;
   await sql`ALTER TABLE projects ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT NOW();`;
 
-  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'unread';`;
+  // Contact Inquiries columns
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS phone VARCHAR(50);`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS category VARCHAR(100) DEFAULT 'General Inquiry';`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'New';`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS is_read BOOLEAN DEFAULT false;`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS read_at TIMESTAMP;`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS assigned_to VARCHAR(255);`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS assigned_staff_email VARCHAR(255);`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS priority VARCHAR(50) DEFAULT 'normal';`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS internal_notes TEXT;`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS response_summary TEXT;`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS responded_at TIMESTAMP;`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS responded_by VARCHAR(255);`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS is_archived VARCHAR(10) DEFAULT 'no';`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS spam_score INT DEFAULT 0;`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS retention_expiry_date TIMESTAMP;`;
+  await sql`ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`;
+
+  // Enquiry Notification & Privacy Settings table
+  await sql`
+    CREATE TABLE IF NOT EXISTS enquiry_notification_settings (
+      id SERIAL PRIMARY KEY,
+      notifications_enabled VARCHAR(10) DEFAULT 'yes',
+      notification_recipient_email VARCHAR(255) DEFAULT 'info@aercghana.net',
+      cc_emails TEXT DEFAULT 'admin@aercgh.org',
+      auto_responder_enabled VARCHAR(10) DEFAULT 'yes',
+      auto_responder_subject VARCHAR(255) DEFAULT 'Thank you for contacting AERC Ghana',
+      auto_responder_message TEXT DEFAULT 'Dear Sender,\n\nThank you for reaching out to the Alliance for Empowering Rural Communities (AERC Ghana). We have received your inquiry and our team is reviewing your message.\n\nWe will get back to you shortly.\n\nWarm regards,\nAERC Ghana Communications & Secretariat',
+      spam_protection_level VARCHAR(50) DEFAULT 'standard',
+      retention_days INT DEFAULT 365,
+      anonymize_after_retention VARCHAR(10) DEFAULT 'yes',
+      updated_at TIMESTAMP DEFAULT NOW(),
+      updated_by VARCHAR(255) DEFAULT 'Admin'
+    );
+  `;
+  await sql`
+    INSERT INTO enquiry_notification_settings (id, notification_recipient_email, notifications_enabled)
+    VALUES (1, 'info@aercghana.net', 'yes')
+    ON CONFLICT (id) DO NOTHING;
+  `;
   await sql`ALTER TABLE site_pages ADD COLUMN IF NOT EXISTS hero_headline TEXT;`;
   await sql`ALTER TABLE site_pages ADD COLUMN IF NOT EXISTS hero_subtitle TEXT;`;
   await sql`ALTER TABLE site_pages ADD COLUMN IF NOT EXISTS hero_image TEXT;`;
@@ -658,6 +697,102 @@ async function main() {
     `;
   }
   console.log(`✅ Verified ${initialRolesUsers.length} role-based administrator accounts.`);
+
+  console.log('Syncing demonstration contact inquiries...');
+  const existingInquiries = await sql`SELECT count(*) FROM contact_inquiries;`;
+  if (Number(existingInquiries[0].count) <= 1) {
+    const demoInquiries = [
+      {
+        name: 'Dr. Kwabena Asante',
+        email: 'kwabena.asante@ug.edu.gh',
+        phone: '+233 24 888 1234',
+        subject: 'Academic Collaboration on Climate Resilience Data',
+        message: 'Greetings Desmond and AERC team, our faculty at University of Ghana is reviewing community-led adaptation benchmarks in the Greater Accra and Volta basin. We would love to collaborate on your upcoming 2026 Climate Adaptation Field Survey.',
+        category: 'Research & Climate Data',
+        status: 'New',
+        is_read: false,
+        priority: 'high',
+        assigned_to: 'Carlisle Naa Dodua Dodoo',
+        assigned_staff_email: 'carlisle.dodoo@aercghana.org',
+        internal_notes: 'Promising academic research partnership. Forwarded to climate research team.',
+      },
+      {
+        name: 'Ama Serwaa Boateng',
+        email: 'ama.boateng@ecobankgh.com',
+        phone: '+233 20 555 7890',
+        subject: 'Corporate Sustainability Partnership & Tree Planting',
+        message: 'We are interested in co-funding the planting of 5,000 mangrove and indigenous shade trees along the Gbetsile catchment area as part of our corporate ESG initiative. Could we arrange an exploratory call this week?',
+        category: 'Partnership & Grants',
+        status: 'In Progress',
+        is_read: true,
+        priority: 'urgent',
+        assigned_to: 'Nicholas Selady Sekpey',
+        assigned_staff_email: 'energy@aercghana.org',
+        internal_notes: 'Ecobank ESG proposal. Budget scope: GHS 85,000. Follow-up meeting scheduled.',
+      },
+      {
+        name: 'Kofi Mensah Annan',
+        email: 'kofi.annan.media@ghanaweb.com',
+        phone: '+233 26 333 4455',
+        subject: 'Press Interview Request: Renewable Energy Access in Rural Off-Grid Districts',
+        message: 'I am producing a feature on decentralized clean mini-grids and clean cooking adoption in rural Ghana. Would an AERC representative be available for a 15-minute studio discussion or remote commentary?',
+        category: 'Media & Press',
+        status: 'Responded',
+        is_read: true,
+        priority: 'normal',
+        assigned_to: 'Sandra Efua Attah Dickson',
+        assigned_staff_email: 'comms@aercghana.org',
+        responded_at: new Date(),
+        responded_by: 'Sandra Efua Attah Dickson',
+        response_summary: 'Connected journalist with Nicholas Selady Sekpey for clean energy brief.',
+      },
+      {
+        name: 'Abena Osei Tutu',
+        email: 'abena.tutu@greenyouth.org',
+        phone: '+233 50 111 2233',
+        subject: 'Student Field Trip & Green-Life Club Mentorship',
+        message: 'Our high school climate club in Tema would be grateful for an educational visit to the AERC Demonstration Nursery and community solar briquetting site during the environmental awareness week.',
+        category: 'Community Initiatives',
+        status: 'New',
+        is_read: false,
+        priority: 'normal',
+        assigned_to: null,
+      },
+      {
+        name: 'Michael Vance',
+        email: 'm.vance@africaclimatefund.org',
+        phone: '+44 20 7946 0991',
+        subject: 'Grant Proposal Guidelines & Submission Confirmation',
+        message: 'Confirming receipt of AERC Ghana expression of interest for the Small Island & Coastal Resilience Fund 2026. Review committee convenes next month.',
+        category: 'Partnership & Grants',
+        status: 'Closed',
+        is_read: true,
+        priority: 'high',
+        assigned_to: 'Desmond Sena Kofi Foe',
+        assigned_staff_email: 'admin@aercgh.org',
+        responded_at: new Date(),
+        responded_by: 'Desmond Sena Kofi Foe',
+        response_summary: 'Full stage-2 proposal dossiers submitted and acknowledgment receipt filed.',
+      },
+    ];
+
+    for (const inq of demoInquiries) {
+      await sql`
+        INSERT INTO contact_inquiries (
+          name, email, phone, subject, message, category, status, is_read, priority,
+          assigned_to, assigned_staff_email, internal_notes, response_summary, responded_at, responded_by
+        )
+        VALUES (
+          ${inq.name}, ${inq.email}, ${inq.phone || null}, ${inq.subject}, ${inq.message},
+          ${inq.category}, ${inq.status}, ${inq.is_read}, ${inq.priority},
+          ${inq.assigned_to || null}, ${inq.assigned_staff_email || null},
+          ${inq.internal_notes || null}, ${inq.response_summary || null},
+          ${inq.responded_at || null}, ${inq.responded_by || null}
+        );
+      `;
+    }
+    console.log(`✅ Seeded ${demoInquiries.length} demonstration contact inquiries.`);
+  }
 
   console.log('🎉 Complete database synchronization successful!');
 }

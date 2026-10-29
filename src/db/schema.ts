@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, varchar, integer } from 'drizzle-orm/pg-core';
+import { pgTable, text, serial, timestamp, varchar, integer, boolean } from 'drizzle-orm/pg-core';
 
 // 1. Blog Posts
 export const blogPosts = pgTable('blog_posts', {
@@ -158,10 +158,40 @@ export const contactInquiries = pgTable('contact_inquiries', {
   id: serial('id').primaryKey(),
   name: text('name').notNull(),
   email: varchar('email', { length: 255 }).notNull(),
+  phone: varchar('phone', { length: 50 }),
   subject: varchar('subject', { length: 255 }),
   message: text('message').notNull(),
-  status: varchar('status', { length: 50 }).default('unread'), // 'unread', 'read', 'archived'
+  category: varchar('category', { length: 100 }).default('General Inquiry'),
+  status: varchar('status', { length: 50 }).default('New'), // 'New', 'In Progress', 'Responded', 'Closed', 'Archived'
+  isRead: boolean('is_read').default(false),
+  readAt: timestamp('read_at'),
+  assignedTo: varchar('assigned_to', { length: 255 }),
+  assignedStaffEmail: varchar('assigned_staff_email', { length: 255 }),
+  priority: varchar('priority', { length: 50 }).default('normal'), // 'low', 'normal', 'high', 'urgent'
+  internalNotes: text('internal_notes'),
+  responseSummary: text('response_summary'),
+  respondedAt: timestamp('responded_at'),
+  respondedBy: varchar('responded_by', { length: 255 }),
+  isArchived: varchar('is_archived', { length: 10 }).default('no'),
+  spamScore: integer('spam_score').default(0),
+  retentionExpiryDate: timestamp('retention_expiry_date'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const enquiryNotificationSettings = pgTable('enquiry_notification_settings', {
+  id: serial('id').primaryKey(),
+  notificationsEnabled: varchar('notifications_enabled', { length: 10 }).default('yes'),
+  notificationRecipientEmail: varchar('notification_recipient_email', { length: 255 }).default('info@aercghana.net'),
+  ccEmails: text('cc_emails').default('admin@aercgh.org'),
+  autoResponderEnabled: varchar('auto_responder_enabled', { length: 10 }).default('yes'),
+  autoResponderSubject: varchar('auto_responder_subject', { length: 255 }).default('Thank you for contacting AERC Ghana'),
+  autoResponderMessage: text('auto_responder_message'),
+  spamProtectionLevel: varchar('spam_protection_level', { length: 50 }).default('standard'),
+  retentionDays: integer('retention_days').default(365),
+  anonymizeAfterRetention: varchar('anonymize_after_retention', { length: 10 }).default('yes'),
+  updatedAt: timestamp('updated_at').defaultNow(),
+  updatedBy: varchar('updated_by', { length: 255 }).default('Admin'),
 });
 
 // 5. Partner Applications
@@ -543,10 +573,46 @@ export type NewFocusArea = typeof focusAreas.$inferInsert;
 export type FocusAreaRevision = typeof focusAreaRevisions.$inferSelect;
 export type NewFocusAreaRevision = typeof focusAreaRevisions.$inferInsert;
 
-export type ContactInquiry = Omit<typeof contactInquiries.$inferSelect, 'status'> & {
+export type ContactInquiry = Omit<
+  typeof contactInquiries.$inferSelect,
+  | 'phone'
+  | 'category'
+  | 'status'
+  | 'isRead'
+  | 'readAt'
+  | 'assignedTo'
+  | 'assignedStaffEmail'
+  | 'priority'
+  | 'internalNotes'
+  | 'responseSummary'
+  | 'respondedAt'
+  | 'respondedBy'
+  | 'isArchived'
+  | 'spamScore'
+  | 'retentionExpiryDate'
+  | 'updatedAt'
+> & {
+  phone?: string | null;
+  category?: string | null;
   status?: string | null;
+  isRead?: boolean | null;
+  readAt?: Date | null;
+  assignedTo?: string | null;
+  assignedStaffEmail?: string | null;
+  priority?: string | null;
+  internalNotes?: string | null;
+  responseSummary?: string | null;
+  respondedAt?: Date | null;
+  respondedBy?: string | null;
+  isArchived?: string | null;
+  spamScore?: number | null;
+  retentionExpiryDate?: Date | null;
+  updatedAt?: Date | null;
 };
 export type NewContactInquiry = typeof contactInquiries.$inferInsert;
+
+export type EnquiryNotificationSettings = typeof enquiryNotificationSettings.$inferSelect;
+export type NewEnquiryNotificationSettings = typeof enquiryNotificationSettings.$inferInsert;
 
 export type PartnerApplication = typeof partnerApplications.$inferSelect;
 export type NewPartnerApplication = typeof partnerApplications.$inferInsert;

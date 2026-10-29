@@ -1,11 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { submitContactForm } from '@/app/actions';
 
 export default function ContactForm() {
   const [status, setStatus] = useState<{ success: boolean; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
+  const [renderTimestamp, setRenderTimestamp] = useState<number>(0);
+
+  useEffect(() => {
+    setRenderTimestamp(Date.now());
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,6 +24,7 @@ export default function ContactForm() {
     setStatus(res);
     if (res.success) {
       form.reset();
+      setRenderTimestamp(Date.now());
     }
   };
 
@@ -42,6 +48,13 @@ export default function ContactForm() {
       )}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        {/* Anti-spam hidden honeypot field */}
+        <div style={{ display: 'none', position: 'absolute', left: '-9999px' }} aria-hidden="true">
+          <label htmlFor="website_url_hp">Leave this field blank</label>
+          <input type="text" id="website_url_hp" name="website_url_hp" tabIndex={-1} autoComplete="off" />
+          <input type="hidden" name="_submission_ts" value={renderTimestamp} />
+        </div>
+
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-dark)', marginBottom: '8px' }}>Your Name *</label>
@@ -53,25 +66,38 @@ export default function ContactForm() {
           </div>
         </div>
 
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-dark)', marginBottom: '8px' }}>Phone Number (Optional)</label>
+            <input type="tel" name="phone" placeholder="+233 24 123 4567" style={{ width: '100%', padding: '14px 16px', border: '1px solid #dbe2dd', borderRadius: '6px', fontSize: '0.95rem', fontFamily: 'inherit', outline: 'none' }} />
+          </div>
+          <div>
+            <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-dark)', marginBottom: '8px' }}>Inquiry Category *</label>
+            <select name="category" required style={{ width: '100%', padding: '14px 16px', border: '1px solid #dbe2dd', borderRadius: '6px', fontSize: '0.95rem', fontFamily: 'inherit', outline: 'none', background: 'white' }}>
+              <option value="General Inquiry">General Inquiry</option>
+              <option value="Partnership & Grants">Partnership &amp; Grants</option>
+              <option value="Media & Press">Media &amp; Press</option>
+              <option value="Research & Climate Data">Research &amp; Climate Data</option>
+              <option value="Community Initiatives">Community Initiatives</option>
+              <option value="Donations & Giving">Donations &amp; Giving</option>
+              <option value="Careers & Volunteering">Careers &amp; Volunteering</option>
+            </select>
+          </div>
+        </div>
+
         <div>
           <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-dark)', marginBottom: '8px' }}>Subject</label>
-          <select name="subject" style={{ width: '100%', padding: '14px 16px', border: '1px solid #dbe2dd', borderRadius: '6px', fontSize: '0.95rem', fontFamily: 'inherit', outline: 'none', background: 'white' }}>
-            <option value="General Inquiry">Select Subject</option>
-            <option value="Account">Account</option>
-            <option value="Service">Service / Projects</option>
-            <option value="Pricing">Donation / Partnership</option>
-            <option value="Support">Support & Volunteering</option>
-          </select>
+          <input type="text" name="subject" placeholder="What is this inquiry regarding?" style={{ width: '100%', padding: '14px 16px', border: '1px solid #dbe2dd', borderRadius: '6px', fontSize: '0.95rem', fontFamily: 'inherit', outline: 'none' }} />
         </div>
 
         <div>
           <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 600, color: 'var(--primary-dark)', marginBottom: '8px' }}>Your Message *</label>
-          <textarea name="message" placeholder="Write your message here..." rows={5} required style={{ width: '100%', padding: '14px 16px', border: '1px solid #dbe2dd', borderRadius: '6px', fontSize: '0.95rem', fontFamily: 'inherit', outline: 'none', resize: 'vertical' }}></textarea>
+          <textarea name="message" placeholder="Write your message here (min. 10 characters)..." rows={5} minLength={10} required style={{ width: '100%', padding: '14px 16px', border: '1px solid #dbe2dd', borderRadius: '6px', fontSize: '0.95rem', fontFamily: 'inherit', outline: 'none', resize: 'vertical' }}></textarea>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <input type="checkbox" id="terms" required style={{ width: '18px', height: '18px', accentColor: 'var(--primary-green)' }} />
-          <label htmlFor="terms" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', cursor: 'pointer' }}>I accept your terms & conditions</label>
+          <label htmlFor="terms" style={{ fontSize: '0.9rem', color: 'var(--text-muted)', cursor: 'pointer' }}>I accept your privacy policy and allow AERC Ghana to contact me.</label>
         </div>
 
         <button type="submit" disabled={loading} style={{ background: 'var(--primary-green)', color: 'white', border: 'none', padding: '16px 36px', borderRadius: '6px', fontWeight: 600, fontSize: '1rem', fontFamily: 'inherit', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px', transition: 'background 0.2s ease', opacity: loading ? 0.7 : 1 }}>

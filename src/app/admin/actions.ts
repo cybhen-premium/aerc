@@ -49,6 +49,12 @@ import {
   createAdmin,
   updateAdmin,
   deleteAdmin,
+  getContactInquiryById,
+  updateContactInquiry,
+  deleteContactInquiry,
+  getEnquiryNotificationSettings,
+  updateEnquiryNotificationSettings,
+  cleanupExpiredInquiries,
 } from '@/db';
 import {
   verifyPassword,
@@ -2422,6 +2428,288 @@ export async function deleteAdminUserAction(id: number): Promise<ActionResult> {
   } catch (error) {
     console.error('Failed to delete admin user:', error);
     return { success: false, error: 'Failed to delete administrator account.' };
+  }
+}
+
+/**
+ * -----------------------------------------------------------------------------
+ * 11. Contact Enquiries Management Server Actions
+ * -----------------------------------------------------------------------------
+ */
+
+export async function markInquiryReadAction(id: number, isRead: boolean): Promise<ActionResult> {
+  await requireAdmin();
+
+  try {
+    await updateContactInquiry(id, {
+      isRead,
+      readAt: isRead ? new Date() : null,
+      status: isRead ? 'In Progress' : 'New',
+    });
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to mark inquiry read status:', error);
+    return { success: false, error: 'Failed to update read status.' };
+  }
+}
+
+export async function updateInquiryStatusAction(id: number, status: string): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    const updated = await updateContactInquiry(id, { status });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'inquiry',
+      updated?.subject || `Inquiry #${id}`,
+      `Updated contact inquiry status to [${status}]`
+    );
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update inquiry status:', error);
+    return { success: false, error: 'Failed to update inquiry status.' };
+  }
+}
+
+export async function assignInquiryAction(
+  id: number,
+  staffName: string,
+  staffEmail?: string
+): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    const updated = await updateContactInquiry(id, {
+      assignedTo: staffName || null,
+      assignedStaffEmail: staffEmail || null,
+      status: 'In Progress',
+      isRead: true,
+      readAt: new Date(),
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'inquiry',
+      updated?.subject || `Inquiry #${id}`,
+      `Assigned inquiry to staff member [${staffName}]`
+    );
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to assign inquiry:', error);
+    return { success: false, error: 'Failed to assign inquiry to staff member.' };
+  }
+}
+
+export async function updateInquiryPriorityAction(id: number, priority: string): Promise<ActionResult> {
+  await requireAdmin();
+
+  try {
+    await updateContactInquiry(id, { priority });
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update priority:', error);
+    return { success: false, error: 'Failed to update priority level.' };
+  }
+}
+
+export async function updateInquiryCategoryAction(id: number, category: string): Promise<ActionResult> {
+  await requireAdmin();
+
+  try {
+    await updateContactInquiry(id, { category });
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update category:', error);
+    return { success: false, error: 'Failed to update category.' };
+  }
+}
+
+export async function saveInquiryInternalNotesAction(id: number, internalNotes: string): Promise<ActionResult> {
+  await requireAdmin();
+
+  try {
+    await updateContactInquiry(id, { internalNotes });
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to save internal notes:', error);
+    return { success: false, error: 'Failed to save staff notes.' };
+  }
+}
+
+export async function recordInquiryResponseAction(
+  id: number,
+  responseSummary: string
+): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  if (!responseSummary || !responseSummary.trim()) {
+    return { success: false, error: 'Response notes or summary cannot be empty.' };
+  }
+
+  try {
+    const updated = await updateContactInquiry(id, {
+      responseSummary: responseSummary.trim(),
+      respondedAt: new Date(),
+      respondedBy: session.name || session.email,
+      status: 'Responded',
+      isRead: true,
+      readAt: new Date(),
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'inquiry',
+      updated?.subject || `Inquiry #${id}`,
+      `Recorded official response for sender [${updated?.name}]: "${responseSummary.slice(0, 80)}..."`
+    );
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to record inquiry response:', error);
+    return { success: false, error: 'Failed to record response.' };
+  }
+}
+
+export async function toggleArchiveInquiryAction(id: number, isArchived: boolean): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    const updated = await updateContactInquiry(id, {
+      isArchived: isArchived ? 'yes' : 'no',
+      status: isArchived ? 'Archived' : 'New',
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'inquiry',
+      updated?.subject || `Inquiry #${id}`,
+      `${isArchived ? 'Archived' : 'Restored from archive'} contact inquiry`
+    );
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to toggle archive status:', error);
+    return { success: false, error: 'Failed to change archive status.' };
+  }
+}
+
+export async function deleteInquiryAction(id: number): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  // Privacy protection: only administrators can delete personal inquiries
+  const normalizedRole = session.role?.toLowerCase();
+  if (normalizedRole !== 'superadmin' && normalizedRole !== 'admin') {
+    return { success: false, error: 'Permission denied. Only Super Admins or Administrators can delete personal inquiry data.' };
+  }
+
+  try {
+    const existing = await getContactInquiryById(id);
+    await deleteContactInquiry(id);
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'delete',
+      'inquiry',
+      existing?.subject || `Inquiry #${id}`,
+      `Permanently deleted contact inquiry personal data from sender [${existing?.name} (${existing?.email})]`
+    );
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete inquiry:', error);
+    return { success: false, error: 'Failed to delete inquiry.' };
+  }
+}
+
+export async function updateNotificationSettingsAction(formData: FormData): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  const recipientEmail = (formData.get('notificationRecipientEmail') as string)?.trim() || 'info@aercghana.net';
+  const ccEmails = (formData.get('ccEmails') as string)?.trim() || null;
+  const notificationsEnabled = (formData.get('notificationsEnabled') as string) === 'yes' ? 'yes' : 'no';
+  const autoResponderEnabled = (formData.get('autoResponderEnabled') as string) === 'yes' ? 'yes' : 'no';
+  const autoResponderSubject = (formData.get('autoResponderSubject') as string)?.trim() || 'Thank you for contacting AERC Ghana';
+  const autoResponderMessage = (formData.get('autoResponderMessage') as string)?.trim() || null;
+  const spamProtectionLevel = (formData.get('spamProtectionLevel') as string) || 'standard';
+  const retentionDaysRaw = formData.get('retentionDays') as string;
+  const retentionDays = retentionDaysRaw ? parseInt(retentionDaysRaw, 10) : 365;
+  const anonymizeAfterRetention = (formData.get('anonymizeAfterRetention') as string) === 'yes' ? 'yes' : 'no';
+
+  try {
+    await updateEnquiryNotificationSettings({
+      notificationRecipientEmail: recipientEmail,
+      ccEmails,
+      notificationsEnabled,
+      autoResponderEnabled,
+      autoResponderSubject,
+      autoResponderMessage,
+      spamProtectionLevel,
+      retentionDays,
+      anonymizeAfterRetention,
+      updatedBy: session.name || session.email,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'settings',
+      'Enquiry Notification & Privacy Settings',
+      `Updated notification recipient (${recipientEmail}), auto-responder, and retention policy (${retentionDays} days)`
+    );
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update notification settings:', error);
+    return { success: false, error: 'Failed to save notification settings.' };
+  }
+}
+
+export async function cleanupRetentionAction(): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  try {
+    const settings = await getEnquiryNotificationSettings();
+    const retentionDays = settings?.retentionDays || 365;
+    const count = await cleanupExpiredInquiries(retentionDays);
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'delete',
+      'inquiry',
+      'Data Privacy Retention Cleanup',
+      `Purged ${count} expired contact inquiries older than ${retentionDays} days in compliance with privacy retention policy`
+    );
+
+    revalidatePath('/admin/inquiries');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to run retention cleanup:', error);
+    return { success: false, error: 'Failed to run retention purge.' };
   }
 }
 

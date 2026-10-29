@@ -1,6 +1,6 @@
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
-import { desc, eq, count, sql as dSql } from 'drizzle-orm';
+import { desc, eq, count, lt, sql as dSql } from 'drizzle-orm';
 import * as schema from './schema';
 import {
   initialBlogs,
@@ -1256,6 +1256,125 @@ export async function getAllContactInquiries(): Promise<schema.ContactInquiry[]>
   } catch (error) {
     console.error('Failed to fetch contact inquiries:', error);
     return [];
+  }
+}
+
+export async function getContactInquiryById(id: number): Promise<schema.ContactInquiry | null> {
+  if (!db) return null;
+  try {
+    const res = await db.select().from(schema.contactInquiries).where(eq(schema.contactInquiries.id, id)).limit(1);
+    return res[0] || null;
+  } catch (error) {
+    console.error('Failed to get contact inquiry by id:', error);
+    return null;
+  }
+}
+
+export async function createContactInquiry(data: schema.NewContactInquiry): Promise<schema.ContactInquiry | null> {
+  if (!db) return null;
+  try {
+    const res = await db.insert(schema.contactInquiries).values({
+      ...data,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    return res[0] || null;
+  } catch (error) {
+    console.error('Failed to create contact inquiry:', error);
+    throw error;
+  }
+}
+
+export async function updateContactInquiry(
+  id: number,
+  data: Partial<schema.NewContactInquiry>
+): Promise<schema.ContactInquiry | null> {
+  if (!db) return null;
+  try {
+    const res = await db
+      .update(schema.contactInquiries)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.contactInquiries.id, id))
+      .returning();
+    return res[0] || null;
+  } catch (error) {
+    console.error('Failed to update contact inquiry:', error);
+    throw error;
+  }
+}
+
+export async function deleteContactInquiry(id: number): Promise<boolean> {
+  if (!db) return false;
+  try {
+    await db.delete(schema.contactInquiries).where(eq(schema.contactInquiries.id, id));
+    return true;
+  } catch (error) {
+    console.error('Failed to delete contact inquiry:', error);
+    return false;
+  }
+}
+
+export async function getEnquiryNotificationSettings(): Promise<schema.EnquiryNotificationSettings | null> {
+  if (!db) return null;
+  try {
+    const res = await db.select().from(schema.enquiryNotificationSettings).limit(1);
+    if (res.length > 0) return res[0];
+
+    const inserted = await db.insert(schema.enquiryNotificationSettings).values({
+      id: 1,
+      notificationRecipientEmail: 'info@aercghana.net',
+      notificationsEnabled: 'yes',
+      autoResponderEnabled: 'yes',
+      autoResponderSubject: 'Thank you for contacting AERC Ghana',
+      autoResponderMessage: 'Dear Sender,\n\nThank you for reaching out to the Alliance for Empowering Rural Communities (AERC Ghana). We have received your inquiry and our team is reviewing your message.\n\nWe will get back to you shortly.\n\nWarm regards,\nAERC Ghana Communications & Secretariat',
+      spamProtectionLevel: 'standard',
+      retentionDays: 365,
+      anonymizeAfterRetention: 'yes',
+    }).returning();
+    return inserted[0] || null;
+  } catch (error) {
+    console.error('Failed to fetch enquiry notification settings:', error);
+    return null;
+  }
+}
+
+export async function updateEnquiryNotificationSettings(
+  data: Partial<schema.NewEnquiryNotificationSettings>
+): Promise<schema.EnquiryNotificationSettings | null> {
+  if (!db) return null;
+  try {
+    const res = await db
+      .update(schema.enquiryNotificationSettings)
+      .set({
+        ...data,
+        updatedAt: new Date(),
+      })
+      .where(eq(schema.enquiryNotificationSettings.id, 1))
+      .returning();
+    return res[0] || null;
+  } catch (error) {
+    console.error('Failed to update enquiry notification settings:', error);
+    throw error;
+  }
+}
+
+export async function cleanupExpiredInquiries(retentionDays = 365): Promise<number> {
+  if (!db) return 0;
+  try {
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+
+    const deleted = await db
+      .delete(schema.contactInquiries)
+      .where(lt(schema.contactInquiries.createdAt, cutoffDate))
+      .returning();
+    return deleted.length;
+  } catch (error) {
+    console.error('Failed to cleanup expired inquiries:', error);
+    return 0;
   }
 }
 

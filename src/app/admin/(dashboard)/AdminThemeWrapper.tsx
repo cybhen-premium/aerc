@@ -45,7 +45,7 @@ export default function AdminThemeWrapper({
     <div
       className={`min-h-screen flex transition-colors duration-200 ${
         isLight
-          ? 'admin-light-mode bg-white text-slate-900'
+          ? 'admin-light-mode bg-slate-50 text-slate-900'
           : 'bg-slate-950 text-slate-100'
       }`}
     >

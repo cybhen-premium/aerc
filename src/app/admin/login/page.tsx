@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getSession } from '@/lib/auth';
 import LoginForm from './LoginForm';
-import { Shield, ArrowLeft, Leaf, CheckCircle2, Lock, Sparkles, Database, FileText } from 'lucide-react';
+import { Shield, ArrowLeft, Database } from 'lucide-react';
 
 export const metadata = {
   title: 'Admin Sign In | AERC Ghana Management Portal',
@@ -24,12 +24,14 @@ export default async function AdminLoginPage() {
         <div className="absolute bottom-0 left-0 -ml-24 -mb-24 w-96 h-96 rounded-full bg-teal-600/15 blur-3xl pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_30%,_rgba(16,185,129,0.12),_transparent_70%)] pointer-events-none" />
 
-        {/* Top Header Branding */}
+        {/* Top Header Branding with Original Logo */}
         <div className="relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center shadow-lg shadow-emerald-950">
-              <Leaf className="w-6 h-6" />
-            </div>
+          <div className="flex items-center gap-3.5">
+            <img
+              src="/images/logo-sidebar.png"
+              alt="AERC Ghana Official Logo"
+              className="w-14 h-14 object-contain rounded-full shadow-xl bg-black/20 p-0.5 border border-white/20 shrink-0"
+            />
             <div>
               <div className="font-extrabold text-base tracking-wide text-white">AERC GHANA</div>
               <div className="text-[11px] font-semibold tracking-wider text-emerald-400 uppercase">
@@ -102,25 +104,33 @@ export default async function AdminLoginPage() {
 
         {/* Center Login Box */}
         <div className="w-full max-w-md mx-auto my-auto py-8">
-          <div className="mb-8">
-            {/* Mobile Branding (visible only on small screens) */}
-            <div className="lg:hidden flex items-center gap-2.5 mb-6">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center shadow-md">
-                <Leaf className="w-5 h-5" />
+          <div className="mb-6">
+            {/* Original Official Logo Header on the Login Form */}
+            <div className="flex items-center gap-3.5 mb-5">
+              <img
+                src="/images/logo-sidebar.png"
+                alt="AERC Ghana Official Logo"
+                className="w-14 h-14 object-contain rounded-full shadow-md shrink-0"
+              />
+              <div>
+                <span className="font-extrabold text-slate-900 tracking-tight text-base block">
+                  AERC GHANA
+                </span>
+                <span className="text-[11px] font-semibold text-emerald-700 tracking-wider uppercase block">
+                  Alliance for Empowering Rural Communities
+                </span>
               </div>
-              <span className="font-extrabold text-slate-900 tracking-wide text-sm">AERC GHANA</span>
             </div>
 
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-bold tracking-wider uppercase mb-3">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[11px] font-bold tracking-wider uppercase mb-2.5">
               <Shield className="w-3 h-3 text-emerald-600" />
-              <span>Administrative Access</span>
+              <span>Staff Portal Authentication</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
               Management Console
             </h1>
             <p className="text-xs sm:text-sm text-slate-600 mt-1.5 leading-relaxed">
-              Sign in with your verified staff credentials to manage published research,
-              grassroots projects, team rosters, and citizen inquiries.
+              Sign in with your authorized credentials to access administrative modules, research publications, and community inquiries.
             </p>
           </div>
 

@@ -68,9 +68,11 @@ export default function AdminNav({ user }: AdminNavProps) {
       {/* Brand Header - Fixed at Top */}
       <div className="p-5 border-b border-slate-200 flex items-center justify-between shrink-0 bg-white">
         <Link href="/admin" className="flex items-center gap-2.5">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-600 to-emerald-400 text-white flex items-center justify-center shadow-md shadow-emerald-700/20">
-            <Leaf className="w-5 h-5" />
-          </div>
+          <img
+            src="/images/logo-sidebar.png"
+            alt="AERC Logo"
+            className="w-9 h-9 object-contain rounded-full shadow-sm shrink-0"
+          />
           <div>
             <div className="font-bold text-sm text-slate-900 tracking-wide">AERC PORTAL</div>
             <div className="text-[10px] uppercase font-semibold text-emerald-600 tracking-wider">

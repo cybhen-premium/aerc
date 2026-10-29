@@ -186,18 +186,25 @@ export default async function AdminDashboardPage() {
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-emerald-500/5 blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-3">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <span>Live System Operational &bull; Neon PostgreSQL Connected</span>
+          <div className="flex items-start gap-4">
+            <img
+              src="/images/logo-sidebar.png"
+              alt="AERC Ghana Official Logo"
+              className="w-14 h-14 object-contain rounded-full shadow-md shrink-0 hidden sm:block"
+            />
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/80 border border-emerald-200 text-emerald-800 text-xs font-semibold mb-3">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+                <span>Live System Operational &bull; Neon PostgreSQL Connected</span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
+                AERC Management Console
+              </h1>
+              <p className="text-sm text-slate-600 max-w-2xl mt-1.5 leading-relaxed">
+                Real-time oversight of AERC Ghana’s climate justice campaigns, policy research,
+                grassroots solidarity gifts, and public-facing content.
+              </p>
             </div>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">
-              AERC Management Console
-            </h1>
-            <p className="text-sm text-slate-600 max-w-2xl mt-1.5 leading-relaxed">
-              Real-time oversight of AERC Ghana’s climate justice campaigns, policy research,
-              grassroots solidarity gifts, and public-facing content.
-            </p>
           </div>
 
           {/* Quick-Action Buttons requested in specification */}

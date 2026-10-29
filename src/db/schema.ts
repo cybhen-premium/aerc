@@ -216,7 +216,12 @@ export const admins = pgTable('admins', {
   email: varchar('email', { length: 255 }).unique().notNull(),
   passwordHash: text('password_hash').notNull(),
   role: varchar('role', { length: 50 }).default('admin').notNull(),
+  status: varchar('status', { length: 50 }).default('active').notNull(), // 'active', 'inactive', 'suspended'
+  department: varchar('department', { length: 100 }),
+  phone: varchar('phone', { length: 50 }),
+  avatar: text('avatar'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
   lastLoginAt: timestamp('last_login_at'),
 });
 
@@ -552,7 +557,17 @@ export type NewVolunteerApplication = typeof volunteerApplications.$inferInsert;
 export type BlogComment = typeof blogComments.$inferSelect;
 export type NewBlogComment = typeof blogComments.$inferInsert;
 
-export type Admin = typeof admins.$inferSelect;
+export type Admin = Omit<
+  typeof admins.$inferSelect,
+  'status' | 'department' | 'phone' | 'avatar' | 'updatedAt' | 'lastLoginAt'
+> & {
+  status?: string | null;
+  department?: string | null;
+  phone?: string | null;
+  avatar?: string | null;
+  updatedAt?: Date | null;
+  lastLoginAt?: Date | null;
+};
 export type NewAdmin = typeof admins.$inferInsert;
 
 export type Donation = typeof donations.$inferSelect;

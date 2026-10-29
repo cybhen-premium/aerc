@@ -9,12 +9,8 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.ADMIN_SESSION_SECRET || DEFAULT_SECRET
 );
 
-export interface SessionUser {
-  id: number;
-  email: string;
-  name: string;
-  role: string;
-}
+import { SessionUser } from './permissions';
+export * from './permissions';
 
 /**
  * Hash a plain text password with bcrypt

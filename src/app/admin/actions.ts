@@ -2,74 +2,9 @@
 
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
-import { findAdminByEmail, updateAdminLastLogin } from '@/db';
-import { verifyPassword, signSessionToken, setSessionCookie, clearSessionCookie } from '@/lib/auth';
-
-export interface ActionResult {
-  success: boolean;
-  error?: string;
-}
-
-/**
- * Administrator login server action
- */
-export async function loginAdminAction(
-  prevState: ActionResult | null,
-  formData: FormData
-): Promise<ActionResult> {
-  const email = (formData.get('email') as string)?.trim().toLowerCase();
-  const password = formData.get('password') as string;
-
-  if (!email || !password) {
-    return { success: false, error: 'Please provide both email and password.' };
-  }
-
-  try {
-    const admin = await findAdminByEmail(email);
-    if (!admin) {
-      return { success: false, error: 'Invalid email or password.' };
-    }
-
-    const isValid = await verifyPassword(password, admin.passwordHash);
-    if (!isValid) {
-      return { success: false, error: 'Invalid email or password.' };
-    }
-
-    // Update last login timestamp in background
-    await updateAdminLastLogin(admin.id);
-
-    // Create session token & HTTP-only cookie
-    const token = await signSessionToken({
-      id: admin.id,
-      email: admin.email,
-      name: admin.name,
-      role: admin.role,
-    });
-
-    await setSessionCookie(token);
-  } catch (error) {
-    console.error('Login action error:', error);
-    return { success: false, error: 'An unexpected authentication error occurred.' };
-  }
-
-  revalidatePath('/admin');
-  redirect('/admin');
-}
-
-/**
- * Administrator logout server action
- */
-export async function logoutAdminAction(): Promise<void> {
-  await clearSessionCookie();
-  revalidatePath('/admin');
-  redirect('/admin/login');
-}
-
-/**
- * Article & News Management Server Actions
- */
-
 import {
+  findAdminByEmail,
+  updateAdminLastLogin,
   createBlogPost,
   updateBlogPost,
   deleteBlogPost,
@@ -110,9 +45,94 @@ import {
   checkMediaUsage,
   getHomepageSettings,
   updateHomepageSettings,
+  getAdminById,
+  createAdmin,
+  updateAdmin,
+  deleteAdmin,
 } from '@/db';
-import { requireAdmin } from '@/lib/auth';
+import {
+  verifyPassword,
+  hashPassword,
+  signSessionToken,
+  setSessionCookie,
+  clearSessionCookie,
+  requireAdmin,
+} from '@/lib/auth';
 import { uploadFileToStorage, deleteMediaFile } from '@/lib/cloudinary';
+
+export interface ActionResult {
+  success: boolean;
+  error?: string;
+}
+
+/**
+ * Administrator login server action
+ */
+export async function loginAdminAction(
+  prevState: ActionResult | null,
+  formData: FormData
+): Promise<ActionResult> {
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
+  const password = formData.get('password') as string;
+
+  if (!email || !password) {
+    return { success: false, error: 'Please provide both email and password.' };
+  }
+
+  try {
+    const admin = await findAdminByEmail(email);
+    if (!admin) {
+      return { success: false, error: 'Invalid email or password.' };
+    }
+
+    if (admin.status === 'inactive' || admin.status === 'suspended') {
+      return { success: false, error: 'This administrator account is deactivated. Please contact Super Admin.' };
+    }
+
+    const isValid = await verifyPassword(password, admin.passwordHash);
+    if (!isValid) {
+      return { success: false, error: 'Invalid email or password.' };
+    }
+
+    // Update last login timestamp in background
+    await updateAdminLastLogin(admin.id);
+
+    // Record login activity
+    await logAdminActivity(
+      admin.email,
+      admin.name,
+      'login',
+      'user',
+      'Administrator Sign In',
+      `Successful sign in to AERC portal (${admin.role})`
+    );
+
+    // Create session token & HTTP-only cookie
+    const token = await signSessionToken({
+      id: admin.id,
+      email: admin.email,
+      name: admin.name,
+      role: admin.role,
+    });
+
+    await setSessionCookie(token);
+  } catch (error) {
+    console.error('Login action error:', error);
+    return { success: false, error: 'An unexpected authentication error occurred.' };
+  }
+
+  revalidatePath('/admin');
+  redirect('/admin');
+}
+
+/**
+ * Administrator logout server action
+ */
+export async function logoutAdminAction(): Promise<void> {
+  await clearSessionCookie();
+  revalidatePath('/admin');
+  redirect('/admin/login');
+}
 
 function slugify(text: string): string {
   return text
@@ -2140,6 +2160,268 @@ export async function updateHomepageContentAction(
   } catch (error) {
     console.error('Failed to update homepage content:', error);
     return { success: false, error: 'Failed to save homepage modifications.' };
+  }
+}
+
+/**
+ * -----------------------------------------------------------------------------
+ * 10. Users & Permissions Server Actions
+ * -----------------------------------------------------------------------------
+ */
+
+export async function createAdminUserAction(formData: FormData): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  // Role restriction check
+  const normalizedRole = session.role?.toLowerCase();
+  if (normalizedRole !== 'superadmin' && normalizedRole !== 'admin') {
+    return { success: false, error: 'Permission denied. Only administrators can create staff accounts.' };
+  }
+
+  const name = (formData.get('name') as string)?.trim();
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
+  const role = ((formData.get('role') as string)?.trim().toLowerCase() || 'editor') as any;
+  const department = (formData.get('department') as string)?.trim() || null;
+  const phone = (formData.get('phone') as string)?.trim() || null;
+  const password = formData.get('password') as string;
+
+  if (!name || !email || !password) {
+    return { success: false, error: 'Name, email, and initial password are required.' };
+  }
+
+  if (password.length < 8) {
+    return { success: false, error: 'Password must be at least 8 characters long.' };
+  }
+
+  // Non-superadmins cannot assign superadmin role
+  if (role === 'superadmin' && normalizedRole !== 'superadmin') {
+    return { success: false, error: 'Only Super Admins can assign the Super Admin role.' };
+  }
+
+  try {
+    const existing = await findAdminByEmail(email);
+    if (existing) {
+      return { success: false, error: 'An administrator account with this email already exists.' };
+    }
+
+    const passwordHash = await hashPassword(password);
+
+    const newAdmin = await createAdmin({
+      name,
+      email,
+      passwordHash,
+      role,
+      status: 'active',
+      department,
+      phone,
+    });
+
+    if (!newAdmin) {
+      return { success: false, error: 'Failed to create user account in database.' };
+    }
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'create',
+      'user',
+      name,
+      `Created new administrator account [${email}] with role: ${role}`
+    );
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to create admin user:', error);
+    return { success: false, error: 'Failed to register administrator account.' };
+  }
+}
+
+export async function updateAdminUserAction(formData: FormData): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  const normalizedRole = session.role?.toLowerCase();
+  if (normalizedRole !== 'superadmin' && normalizedRole !== 'admin') {
+    return { success: false, error: 'Permission denied. Only administrators can edit accounts.' };
+  }
+
+  const id = Number(formData.get('id'));
+  const name = (formData.get('name') as string)?.trim();
+  const email = (formData.get('email') as string)?.trim().toLowerCase();
+  const role = ((formData.get('role') as string)?.trim().toLowerCase() || 'editor') as any;
+  const department = (formData.get('department') as string)?.trim() || null;
+  const phone = (formData.get('phone') as string)?.trim() || null;
+  const status = ((formData.get('status') as string)?.trim().toLowerCase() || 'active') as any;
+
+  if (!id || !name || !email) {
+    return { success: false, error: 'Account ID, name, and email are required.' };
+  }
+
+  // Non-superadmins cannot grant or revoke superadmin
+  if (role === 'superadmin' && normalizedRole !== 'superadmin') {
+    return { success: false, error: 'Only Super Admins can assign the Super Admin role.' };
+  }
+
+  try {
+    const target = await getAdminById(id);
+    if (!target) {
+      return { success: false, error: 'Target administrator account not found.' };
+    }
+
+    // Protect against self-deactivation or self-demotion
+    if (session.id === id && status === 'inactive') {
+      return { success: false, error: 'You cannot deactivate your own active session account.' };
+    }
+    if (session.id === id && target.role === 'superadmin' && role !== 'superadmin') {
+      return { success: false, error: 'You cannot demote your own Super Admin privileges.' };
+    }
+
+    await updateAdmin(id, {
+      name,
+      email,
+      role,
+      department,
+      phone,
+      status,
+    });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'user',
+      name,
+      `Updated user profile [${email}] (Role: ${role}, Status: ${status})`
+    );
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to update admin user:', error);
+    return { success: false, error: 'Failed to update administrator details.' };
+  }
+}
+
+export async function toggleAdminUserStatusAction(
+  id: number,
+  currentStatus: string
+): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  const normalizedRole = session.role?.toLowerCase();
+  if (normalizedRole !== 'superadmin') {
+    return { success: false, error: 'Only Super Admins can activate or deactivate accounts.' };
+  }
+
+  if (session.id === id) {
+    return { success: false, error: 'You cannot deactivate your own account.' };
+  }
+
+  try {
+    const target = await getAdminById(id);
+    if (!target) {
+      return { success: false, error: 'User not found.' };
+    }
+
+    const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    await updateAdmin(id, { status: nextStatus });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'update',
+      'user',
+      target.name,
+      `Changed account status from ${currentStatus} to ${nextStatus}`
+    );
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to toggle user status:', error);
+    return { success: false, error: 'Failed to change account status.' };
+  }
+}
+
+export async function resetAdminUserPasswordAction(formData: FormData): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  const normalizedRole = session.role?.toLowerCase();
+  if (normalizedRole !== 'superadmin' && normalizedRole !== 'admin') {
+    return { success: false, error: 'Permission denied. Only authorized administrators can reset passwords.' };
+  }
+
+  const id = Number(formData.get('id'));
+  const newPassword = formData.get('newPassword') as string;
+
+  if (!id || !newPassword) {
+    return { success: false, error: 'Account ID and new password are required.' };
+  }
+
+  if (newPassword.length < 8) {
+    return { success: false, error: 'New password must be at least 8 characters long.' };
+  }
+
+  try {
+    const target = await getAdminById(id);
+    if (!target) {
+      return { success: false, error: 'Target account not found.' };
+    }
+
+    const passwordHash = await hashPassword(newPassword);
+    await updateAdmin(id, { passwordHash });
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'reset_password',
+      'user',
+      target.name,
+      `Securely reset password credentials for [${target.email}]`
+    );
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to reset user password:', error);
+    return { success: false, error: 'Failed to reset credentials.' };
+  }
+}
+
+export async function deleteAdminUserAction(id: number): Promise<ActionResult> {
+  const session = await requireAdmin();
+
+  const normalizedRole = session.role?.toLowerCase();
+  if (normalizedRole !== 'superadmin') {
+    return { success: false, error: 'Only Super Admins have permission to delete administrator accounts.' };
+  }
+
+  if (session.id === id) {
+    return { success: false, error: 'You cannot delete your own currently active account.' };
+  }
+
+  try {
+    const target = await getAdminById(id);
+    if (!target) {
+      return { success: false, error: 'User account not found.' };
+    }
+
+    await deleteAdmin(id);
+
+    await logAdminActivity(
+      session.email,
+      session.name,
+      'delete',
+      'user',
+      target.name,
+      `Deleted administrator account [${target.email}] (${target.role})`
+    );
+
+    revalidatePath('/admin/users');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to delete admin user:', error);
+    return { success: false, error: 'Failed to delete administrator account.' };
   }
 }
 

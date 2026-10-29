@@ -355,6 +355,13 @@ async function main() {
 
   await sql`CREATE UNIQUE INDEX IF NOT EXISTS idx_publications_slug ON publications (slug);`;
 
+  // Admin user columns
+  await sql`ALTER TABLE admins ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'active';`;
+  await sql`ALTER TABLE admins ADD COLUMN IF NOT EXISTS department VARCHAR(100);`;
+  await sql`ALTER TABLE admins ADD COLUMN IF NOT EXISTS phone VARCHAR(50);`;
+  await sql`ALTER TABLE admins ADD COLUMN IF NOT EXISTS avatar TEXT;`;
+  await sql`ALTER TABLE admins ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();`;
+
   console.log('✅ Tables and schema columns verified.');
 
   const { initialProjects, initialBlogs, initialTeamMembers, initialSitePages, initialActivityLogs, initialFocusAreas, initialPublications, initialMediaItems, initialHomepageSettings } = await import('../src/db/seed-data.ts');
@@ -575,17 +582,82 @@ async function main() {
     `;
   }
 
-  const existingAdmins = await sql`SELECT count(*) FROM admins;`;
-  if (Number(existingAdmins[0].count) === 0) {
-    console.log('Seeding initial administrator account...');
-    const bcrypt = (await import('bcryptjs')).default;
-    const passwordHash = await bcrypt.hash('AdminPassword2026!', 12);
+  console.log('Verifying standard demonstration admin accounts and roles...');
+  const bcrypt = (await import('bcryptjs')).default;
+  const defaultPasswordHash = await bcrypt.hash('Password123!', 12);
+
+  const initialRolesUsers = [
+    {
+      name: 'Desmond Sena Kofi Foe',
+      email: 'admin@aercgh.org',
+      role: 'superadmin',
+      department: 'Executive Leadership',
+      phone: '+233 24 123 4567',
+      status: 'active',
+    },
+    {
+      name: 'AERC SuperAdmin',
+      email: 'admin@aercghana.org',
+      role: 'superadmin',
+      department: 'System Governance',
+      phone: '+233 24 000 1122',
+      status: 'active',
+    },
+    {
+      name: 'Carlisle Naa Dodua Dodoo',
+      email: 'carlisle.dodoo@aercghana.org',
+      role: 'editor',
+      department: 'Community-Led Adaptation',
+      phone: '+233 24 234 5678',
+      status: 'active',
+    },
+    {
+      name: 'Nicholas Selady Sekpey',
+      email: 'energy@aercghana.org',
+      role: 'project_manager',
+      department: 'Renewable Energy & Infrastructure',
+      phone: '+233 24 345 6789',
+      status: 'active',
+    },
+    {
+      name: 'Sandra Efua Attah Dickson',
+      email: 'comms@aercghana.org',
+      role: 'communications',
+      department: 'Media & Nature-Based Solutions',
+      phone: '+233 24 456 7890',
+      status: 'active',
+    },
+    {
+      name: 'Siisi Ansah',
+      email: 'author@aercghana.org',
+      role: 'author',
+      department: 'Grassroots Storytelling & Youth',
+      phone: '+233 24 567 8901',
+      status: 'active',
+    },
+    {
+      name: 'Yvette Ahenkorah',
+      email: 'finance.viewer@aercghana.org',
+      role: 'viewer',
+      department: 'Finance & Operations Oversight',
+      phone: '+233 24 678 9012',
+      status: 'active',
+    },
+  ];
+
+  for (const user of initialRolesUsers) {
     await sql`
-      INSERT INTO admins (name, email, password_hash, role)
-      VALUES ('AERC Administrator', 'admin@aercghana.org', ${passwordHash}, 'superadmin');
+      INSERT INTO admins (name, email, password_hash, role, status, department, phone)
+      VALUES (${user.name}, ${user.email}, ${defaultPasswordHash}, ${user.role}, ${user.status}, ${user.department}, ${user.phone})
+      ON CONFLICT (email)
+      DO UPDATE SET
+        role = EXCLUDED.role,
+        department = EXCLUDED.department,
+        phone = EXCLUDED.phone,
+        status = EXCLUDED.status;
     `;
-    console.log('✅ Seeded default admin account (admin@aercghana.org / AdminPassword2026!)');
   }
+  console.log(`✅ Verified ${initialRolesUsers.length} role-based administrator accounts.`);
 
   console.log('🎉 Complete database synchronization successful!');
 }

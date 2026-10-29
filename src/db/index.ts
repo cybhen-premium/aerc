@@ -838,6 +838,66 @@ export async function getAllAdmins(): Promise<schema.Admin[]> {
   }
 }
 
+export async function getAdminById(id: number): Promise<schema.Admin | null> {
+  if (!db) return null;
+  try {
+    const res = await db.select().from(schema.admins).where(eq(schema.admins.id, id)).limit(1);
+    return res[0] || null;
+  } catch (error) {
+    console.error('Failed to get admin by id:', error);
+    return null;
+  }
+}
+
+export async function createAdmin(data: schema.NewAdmin): Promise<schema.Admin | null> {
+  if (!db) return null;
+  try {
+    const res = await db.insert(schema.admins).values({
+      ...data,
+      email: data.email.toLowerCase().trim(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }).returning();
+    return res[0] || null;
+  } catch (error) {
+    console.error('Failed to create admin:', error);
+    throw error;
+  }
+}
+
+export async function updateAdmin(
+  id: number,
+  data: Partial<schema.NewAdmin>
+): Promise<schema.Admin | null> {
+  if (!db) return null;
+  try {
+    const updateData: any = { ...data, updatedAt: new Date() };
+    if (updateData.email) {
+      updateData.email = updateData.email.toLowerCase().trim();
+    }
+    const res = await db
+      .update(schema.admins)
+      .set(updateData)
+      .where(eq(schema.admins.id, id))
+      .returning();
+    return res[0] || null;
+  } catch (error) {
+    console.error('Failed to update admin:', error);
+    throw error;
+  }
+}
+
+export async function deleteAdmin(id: number): Promise<boolean> {
+  if (!db) return false;
+  try {
+    await db.delete(schema.admins).where(eq(schema.admins.id, id));
+    return true;
+  } catch (error) {
+    console.error('Failed to delete admin:', error);
+    return false;
+  }
+}
+
 export async function updateAdminLastLogin(adminId: number): Promise<void> {
   if (!db) return;
   try {
@@ -847,6 +907,117 @@ export async function updateAdminLastLogin(adminId: number): Promise<void> {
       .where(eq(schema.admins.id, adminId));
   } catch (error) {
     console.error('Failed to update admin last login:', error);
+  }
+}
+
+export interface UnifiedRevisionItem {
+  id: number;
+  entityType: 'Article' | 'Project' | 'Page' | 'Publication' | 'Focus Area' | 'Team Member';
+  entityId: number;
+  title: string;
+  revisedBy: string;
+  changeSummary: string | null;
+  status: string | null;
+  createdAt: Date;
+}
+
+export async function getAllRevisionsSummary(limitCount = 50): Promise<UnifiedRevisionItem[]> {
+  const unified: UnifiedRevisionItem[] = [];
+  if (!db) return unified;
+
+  try {
+    const [artRevs, projRevs, pageRevs, pubRevs, faRevs, tmRevs] = await Promise.all([
+      db.select().from(schema.articleRevisions).orderBy(desc(schema.articleRevisions.createdAt)).limit(limitCount),
+      db.select().from(schema.projectRevisions).orderBy(desc(schema.projectRevisions.createdAt)).limit(limitCount),
+      db.select().from(schema.pageRevisions).orderBy(desc(schema.pageRevisions.createdAt)).limit(limitCount),
+      db.select().from(schema.publicationRevisions).orderBy(desc(schema.publicationRevisions.createdAt)).limit(limitCount),
+      db.select().from(schema.focusAreaRevisions).orderBy(desc(schema.focusAreaRevisions.createdAt)).limit(limitCount),
+      db.select().from(schema.teamMemberRevisions).orderBy(desc(schema.teamMemberRevisions.createdAt)).limit(limitCount),
+    ]);
+
+    artRevs.forEach((r) => {
+      unified.push({
+        id: r.id,
+        entityType: 'Article',
+        entityId: r.articleId,
+        title: r.title,
+        revisedBy: r.revisedBy || 'Admin',
+        changeSummary: r.changeSummary,
+        status: r.status,
+        createdAt: r.createdAt,
+      });
+    });
+
+    projRevs.forEach((r) => {
+      unified.push({
+        id: r.id,
+        entityType: 'Project',
+        entityId: r.projectId,
+        title: r.title,
+        revisedBy: r.revisedBy || 'Admin',
+        changeSummary: r.changeSummary,
+        status: r.status,
+        createdAt: r.createdAt,
+      });
+    });
+
+    pageRevs.forEach((r) => {
+      unified.push({
+        id: r.id,
+        entityType: 'Page',
+        entityId: r.pageId,
+        title: r.title,
+        revisedBy: r.revisedBy || 'Admin',
+        changeSummary: r.changeSummary,
+        status: r.status,
+        createdAt: r.createdAt,
+      });
+    });
+
+    pubRevs.forEach((r) => {
+      unified.push({
+        id: r.id,
+        entityType: 'Publication',
+        entityId: r.publicationId,
+        title: r.title,
+        revisedBy: r.revisedBy || 'Admin',
+        changeSummary: r.changeSummary,
+        status: r.status,
+        createdAt: r.createdAt,
+      });
+    });
+
+    faRevs.forEach((r) => {
+      unified.push({
+        id: r.id,
+        entityType: 'Focus Area',
+        entityId: r.focusAreaId,
+        title: r.title,
+        revisedBy: r.revisedBy || 'Admin',
+        changeSummary: r.changeSummary,
+        status: r.status,
+        createdAt: r.createdAt,
+      });
+    });
+
+    tmRevs.forEach((r) => {
+      unified.push({
+        id: r.id,
+        entityType: 'Team Member',
+        entityId: r.teamMemberId,
+        title: r.name,
+        revisedBy: r.revisedBy || 'Admin',
+        changeSummary: r.changeSummary,
+        status: r.status,
+        createdAt: r.createdAt,
+      });
+    });
+
+    unified.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return unified.slice(0, limitCount);
+  } catch (err) {
+    console.error('Error fetching revisions summary:', err);
+    return [];
   }
 }
 

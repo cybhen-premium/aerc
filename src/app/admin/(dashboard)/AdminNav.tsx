@@ -23,6 +23,7 @@ import {
   SlidersHorizontal,
 } from 'lucide-react';
 import { logoutAdminAction } from '../actions';
+import { hasPermission, getRoleBadge } from '@/lib/permissions';
 
 interface AdminNavProps {
   user: {
@@ -35,23 +36,30 @@ interface AdminNavProps {
 export default function AdminNav({ user }: AdminNavProps) {
   const pathname = usePathname();
 
-  const navLinks = [
+  const allNavLinks = [
     { href: '/admin', label: 'Dashboard Overview', icon: LayoutDashboard },
-    { href: '/admin/homepage', label: 'Homepage Manager', icon: SlidersHorizontal },
-    { href: '/admin/pages', label: 'Website Pages', icon: Globe },
-    { href: '/admin/blogs', label: 'Articles & News', icon: BookOpen },
-    { href: '/admin/projects', label: 'Projects & Initiatives', icon: Briefcase },
-    { href: '/admin/focus-areas', label: 'Focus Areas & Pillars', icon: Target },
-    { href: '/admin/publications', label: 'Publications & Reports', icon: FileText },
-    { href: '/admin/team', label: 'Team & Leadership', icon: UserCheck },
-    { href: '/admin/media', label: 'Media Library', icon: ImageIcon },
-    { href: '/admin/donations', label: 'Donations & Giving', icon: Heart },
-    { href: '/admin/inquiries', label: 'Contact Inquiries', icon: MessageSquare },
-    { href: '/admin/applications', label: 'Partner Applications', icon: Handshake },
-    { href: '/admin/volunteers', label: 'Volunteer Roster', icon: Users },
-    { href: '/admin/subscribers', label: 'Newsletter Subscribers', icon: Mail },
-    { href: '/admin/users', label: 'Admin Users & Roles', icon: Shield },
+    { href: '/admin/homepage', label: 'Homepage Manager', icon: SlidersHorizontal, permission: 'homepage' },
+    { href: '/admin/pages', label: 'Website Pages', icon: Globe, permission: 'pages' },
+    { href: '/admin/blogs', label: 'Articles & News', icon: BookOpen, permission: 'blogs' },
+    { href: '/admin/projects', label: 'Projects & Initiatives', icon: Briefcase, permission: 'projects' },
+    { href: '/admin/focus-areas', label: 'Focus Areas & Pillars', icon: Target, permission: 'focus_areas' },
+    { href: '/admin/publications', label: 'Publications & Reports', icon: FileText, permission: 'publications' },
+    { href: '/admin/team', label: 'Team & Leadership', icon: UserCheck, permission: 'team' },
+    { href: '/admin/media', label: 'Media Library', icon: ImageIcon, permission: 'media' },
+    { href: '/admin/donations', label: 'Donations & Giving', icon: Heart, permission: 'donations' },
+    { href: '/admin/inquiries', label: 'Contact Inquiries', icon: MessageSquare, permission: 'inquiries' },
+    { href: '/admin/applications', label: 'Partner Applications', icon: Handshake, permission: 'applications' },
+    { href: '/admin/volunteers', label: 'Volunteer Roster', icon: Users, permission: 'volunteers' },
+    { href: '/admin/subscribers', label: 'Newsletter Subscribers', icon: Mail, permission: 'subscribers' },
+    { href: '/admin/users', label: 'Admin Users & Roles', icon: Shield, permission: 'users' },
   ];
+
+  const navLinks = allNavLinks.filter((item) => {
+    if (!item.permission) return true;
+    return hasPermission(user.role, item.permission);
+  });
+
+  const roleInfo = getRoleBadge(user.role);
 
   return (
     <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 min-h-screen">
@@ -124,8 +132,8 @@ export default function AdminNav({ user }: AdminNavProps) {
               <div className="text-[11px] text-slate-400 truncate">{user.email}</div>
             </div>
           </div>
-          <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-950 text-emerald-400 border border-emerald-800 shrink-0 uppercase">
-            {user.role}
+          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${roleInfo.badgeColor}`}>
+            {roleInfo.label}
           </span>
         </div>
 
